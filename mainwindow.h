@@ -1,9 +1,12 @@
 #pragma once
 
 #include <QtGui/QWidget>
+#include <QtCore/QTimer>
 
 class QTextBrowser;
 class QUrl;
+class QLineEdit;
+class Mix_Chunk;
 
 class MainWindow : public QWidget {
 	Q_OBJECT
@@ -12,17 +15,18 @@ public:
 	MainWindow(QWidget * parent = 0);
 	virtual ~MainWindow();
 private slots:
-	void updateText();
-	void changeSetting(const QUrl & settingUrl);
+	void startOrInterrupt();
+	void startPomodoro();
+	void startBreak();
+	void startShortBreak();
+	void startLongBreak();
+	void getReady();
+	void interruptPomodoro();
 private:
-	QTextBrowser * text;
-	int pomodoroLength;
-	int shortBreakLength;
-	int pomodoroBlockSize;
-	int longBreakLength;
-	QColor runningPomodoroColor;
-	QColor passedQuarterColor;
-	QColor breakColor;
-	QString bellFile;
-	QColor readinessFlashColor;
+	QString getStatus();
+	int finishedPomodoroCount;
+	QLineEdit * editTest;
+	QTimer pomodoroTimer;
+	Mix_Chunk * soundStart;
+	Mix_Chunk * soundEnd;
 };
