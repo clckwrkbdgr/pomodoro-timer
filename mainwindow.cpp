@@ -26,10 +26,10 @@ const QString TEXT = MainWindow::tr(
 		"If you want to interrupt current pomodoro, click on the tray icon.<br>"
 		"It will run a short break after which interrupted pomodoro will be started anew.<br>"
 		);
-const int POMODORO_LENGTH = 2;
+const int POMODORO_LENGTH = 25; // minutes.
 const int POMODORO_CYCLE_SIZE = 4;
-const int SHORT_BREAK_LENGTH = 1;
-const int LONG_BREAK_LENGTH = 3;
+const int SHORT_BREAK_LENGTH = 5; // minutes.
+const int LONG_BREAK_LENGTH = 20; // minutes.
 
 void initSDL()
 {
@@ -130,7 +130,7 @@ void MainWindow::startOrInterrupt()
 void MainWindow::startPomodoro()
 {
 	editTest->setText(tr("Started"));
-	pomodoroTimer.setInterval(POMODORO_LENGTH * 1000);
+	pomodoroTimer.setInterval(POMODORO_LENGTH * 60 * 1000);
 	pomodoroTimer.setSingleShot(true);
 	pomodoroTimer.disconnect();
 	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(startBreak()));
@@ -161,7 +161,7 @@ void MainWindow::startBreak()
 void MainWindow::startShortBreak()
 {
 	editTest->setText(tr("Short break"));
-	pomodoroTimer.setInterval(SHORT_BREAK_LENGTH * 1000);
+	pomodoroTimer.setInterval(SHORT_BREAK_LENGTH * 60 * 1000);
 	pomodoroTimer.setSingleShot(true);
 	pomodoroTimer.disconnect();
 	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
@@ -173,7 +173,7 @@ void MainWindow::startShortBreak()
 void MainWindow::startLongBreak()
 {
 	editTest->setText(tr("Long break"));
-	pomodoroTimer.setInterval(LONG_BREAK_LENGTH * 1000);
+	pomodoroTimer.setInterval(LONG_BREAK_LENGTH * 60 * 1000);
 	pomodoroTimer.setSingleShot(true);
 	pomodoroTimer.disconnect();
 	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
