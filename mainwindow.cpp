@@ -10,6 +10,7 @@
 #include <QtGui/QFormLayout>
 #include <QtCore/QFileInfo>
 #include <QtGui/QSound>
+#include "settings.h"
 #include "pomodoro.h"
 #include "sounds.h"
 #include "mainwindow.h"
@@ -35,7 +36,13 @@ MainWindow::MainWindow(QWidget * parent)
 	if(settings.value("mainwindow/maximized", false).toBool())
 		setWindowState(Qt::WindowMaximized);
 
-	pomodoro = new Pomodoro(this);
+	Settings pomodoroSettings;
+	//pomodoroSettings.load();
+	pomodoroSettings.setPomodoroLength(1 * Settings::SECOND);
+	pomodoroSettings.setPomodoroCycleSize(3);
+	pomodoroSettings.setShortBreakLength(1 * Settings::SECOND);
+	pomodoroSettings.setLongBreakLength(2 * Settings::SECOND);
+	pomodoro = new Pomodoro(pomodoroSettings, this);
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 
 	ui.setupUi(this);
@@ -48,6 +55,8 @@ MainWindow::MainWindow(QWidget * parent)
 
 MainWindow::~MainWindow()
 {
+	//pomodoroSettings.save();
+
 	QSettings settings;
 	settings.setValue("mainwindow/maximized", windowState().testFlag(Qt::WindowMaximized));
 	if(!windowState().testFlag(Qt::WindowMaximized))

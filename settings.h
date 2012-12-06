@@ -1,23 +1,23 @@
 #pragma once
-#include <QtCore/QObject>
 
-class Settings : public QObject {
-	Q_OBJECT
-	Q_DISABLE_COPY(Settings)
+class Settings {
 public:
 	enum { SECOND = 1000, MINUTE = 60 * SECOND };
 
-	Settings(QObject * parent = 0);
+	Settings();
 	virtual ~Settings() {}
 
+	void load();
+	void save();
+
 	int getPomodoroLength() const;
-	Settings * setPomodoroLength(int value);
+	void setPomodoroLength(int value);
 	int getPomodoroCycleSize() const;
-	Settings * setPomodoroCycleSize(int value);
+	void setPomodoroCycleSize(int value);
 	int getShortBreakLength() const;
-	Settings * setShortBreakLength(int value);
+	void setShortBreakLength(int value);
 	int getLongBreakLength() const;
-	Settings * setLongBreakLength(int value);
+	void setLongBreakLength(int value);
 private:
 	int pomodoroLength;
 	int pomodoroCycleSize;

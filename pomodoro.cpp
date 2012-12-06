@@ -1,25 +1,12 @@
 #include <QtDebug>
+#include <QtTest/QtTest>
 #include <QtCore/QTimer>
-#include "settings.h"
 #include "pomodoro.h"
 
-//const int SECOND = 1000;
-//const int MINUTE = 60 * SECOND;
-//const int POMODORO_LENGTH = 1 * SECOND;
-//const int POMODORO_CYCLE_SIZE = 2;
-//const int SHORT_BREAK_LENGTH = 1 * SECOND;
-//const int LONG_BREAK_LENGTH = 3 * SECOND;
-/*
-const int POMODORO_LENGTH = 25 * MINUTES;
-const int POMODORO_CYCLE_SIZE = 4;
-const int SHORT_BREAK_LENGTH = 5 * MINUTES;
-const int LONG_BREAK_LENGTH = 20 * MINUTES;
-*/
-
-Pomodoro::Pomodoro(QObject * parent)
+Pomodoro::Pomodoro(const Settings & settings, QObject * parent)
 	: QObject(parent), finishedPomodoroCount(0)
 {
-	settings = new Settings(this);
+	this->settings = settings;
 	pomodoroTimer = new QTimer(this);
 }
 
@@ -43,7 +30,7 @@ void Pomodoro::startOrInterrupt()
 
 void Pomodoro::startPomodoro()
 {
-	restartTimer(settings->getPomodoroLength(), SLOT(startBreak()));
+	restartTimer(settings.getPomodoroLength(), SLOT(startBreak()));
 	emit stateChanged(STARTED);
 }
 
@@ -51,7 +38,7 @@ void Pomodoro::startBreak()
 {
 	++finishedPomodoroCount;
 	bool isShortBreak = true;
-	if(finishedPomodoroCount >= settings->getPomodoroCycleSize()) {
+	if(finishedPomodoroCount >= settings.getPomodoroCycleSize()) {
 		isShortBreak = false;
 		finishedPomodoroCount = 0;
 	}
@@ -66,13 +53,13 @@ void Pomodoro::startBreak()
 void Pomodoro::startShortBreak()
 {
 	emit stateChanged(SHORT_BREAK);
-	restartTimer(settings->getShortBreakLength(), SLOT(getReady()));
+	restartTimer(settings.getShortBreakLength(), SLOT(getReady()));
 }
 
 void Pomodoro::startLongBreak()
 {
 	emit stateChanged(LONG_BREAK);
-	restartTimer(settings->getLongBreakLength(), SLOT(getReady()));
+	restartTimer(settings.getLongBreakLength(), SLOT(getReady()));
 }
 
 void Pomodoro::getReady()
@@ -86,4 +73,102 @@ void Pomodoro::interruptPomodoro()
 	pomodoroTimer->stop();
 }
 
+#ifdef POMODORO_TEST
+class TestPomodoro : public QObject{
+	Q_OBJECT
+private slots:
+	void initTestCase() {
+		debugSettings.setPomodoroLength(200);
+		debugSettings.setPomodoroCycleSize(3);
+		debugSettings.setShortBreakLength(100);
+		debugSettings.setLongBreakLength(300);
+	}
+	void pomodoroStarting() {
+		Pomodoro pomodoro(debugSettings);
+		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
+		pomodoro.startOrInterrupt();
+		QCOMPARE(spy.count(), 1);
+		QCOMPARE(spy.at(0).first().toInt(), int(Pomodoro::STARTED));
+	}
+	void firstShortBreak() {
+		Pomodoro pomodoro(debugSettings);
+		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
+		QEventLoop waitForSignal;
+		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
 
+		pomodoro.startOrInterrupt();
+		checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+		waitForSignal.exec();
+		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+	}
+	void getsReadyAfterShortBreak() {
+		Pomodoro pomodoro(debugSettings);
+		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
+		QEventLoop waitForSignal;
+		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
+
+		pomodoro.startOrInterrupt();
+		checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+		waitForSignal.exec();
+		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+		waitForSignal.exec();
+		checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
+	}
+	void longBreakAfterPomodoroCycle() {
+		Pomodoro pomodoro(debugSettings);
+		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
+		QEventLoop waitForSignal;
+		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
+
+		for(int i = 0; i < debugSettings.getPomodoroCycleSize(); ++i) {
+			pomodoro.startOrInterrupt();
+			checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+			waitForSignal.exec();
+			bool wasLastCycle = (i == debugSettings.getPomodoroCycleSize() - 1);
+			if(wasLastCycle) {
+				checkTheOnlyEventIs(Pomodoro::LONG_BREAK, spy);
+			} else {
+				checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+			}
+			waitForSignal.exec();
+			checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
+		}
+	}
+	void newPomodoroCycleAfterLongBreak() {
+		Pomodoro pomodoro(debugSettings);
+		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
+		QEventLoop waitForSignal;
+		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
+
+		for(int i = 0; i < debugSettings.getPomodoroCycleSize(); ++i) {
+			pomodoro.startOrInterrupt();
+			checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+			waitForSignal.exec();
+			bool wasLastCycle = (i == debugSettings.getPomodoroCycleSize() - 1);
+			if(wasLastCycle) {
+				checkTheOnlyEventIs(Pomodoro::LONG_BREAK, spy);
+			} else {
+				checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+			}
+			waitForSignal.exec();
+			checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
+		}
+
+		pomodoro.startOrInterrupt();
+		checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+		waitForSignal.exec();
+		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+		waitForSignal.exec();
+		checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
+	}
+private:
+	Settings debugSettings;
+	void checkTheOnlyEventIs(int event, QSignalSpy & spy) {
+		QCOMPARE(spy.count(), 1);
+		QCOMPARE(spy.takeFirst().first().toInt(), event);
+	}
+};
+
+QTEST_MAIN(TestPomodoro)
+#include "pomodoro.moc"
+#endif

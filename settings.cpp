@@ -1,12 +1,30 @@
+#include <QtCore/QSettings>
 #include "settings.h"
 
-Settings::Settings(QObject * parent)
-	: QObject(parent),
-	pomodoroLength(1 * SECOND),
+Settings::Settings()
+	: pomodoroLength(25 * MINUTE),
 	pomodoroCycleSize(4),
-	shortBreakLength(1 * SECOND),
-	longBreakLength(3 * SECOND)
+	shortBreakLength(5 * MINUTE),
+	longBreakLength(15 * MINUTE)
 {
+}
+
+void Settings::load()
+{
+	QSettings settings;
+	pomodoroLength = settings.value("pomodoro/pomodorolength", pomodoroLength).toInt();
+	pomodoroCycleSize = settings.value("pomodoro/pomodorocyclesize", pomodoroCycleSize).toInt();
+	shortBreakLength = settings.value("pomodoro/shortbreaklength", shortBreakLength).toInt();
+	longBreakLength = settings.value("pomodoro/longbreaklength", longBreakLength).toInt();
+}
+
+void Settings::save()
+{
+	QSettings settings;
+	settings.setValue("pomodoro/pomodorolength", pomodoroLength);
+	settings.setValue("pomodoro/pomodorocyclesize", pomodoroCycleSize);
+	settings.setValue("pomodoro/shortbreaklength", shortBreakLength);
+	settings.setValue("pomodoro/longbreaklength", longBreakLength);
 }
 
 int Settings::getPomodoroLength() const
@@ -14,10 +32,9 @@ int Settings::getPomodoroLength() const
 	return pomodoroLength;
 }
 
-Settings * Settings::setPomodoroLength(int value)
+void Settings::setPomodoroLength(int value)
 {
 	pomodoroLength = value;
-	return this;
 }
 
 int Settings::getPomodoroCycleSize() const
@@ -25,10 +42,9 @@ int Settings::getPomodoroCycleSize() const
 	return pomodoroCycleSize;
 }
 
-Settings * Settings::setPomodoroCycleSize(int value)
+void Settings::setPomodoroCycleSize(int value)
 {
 	pomodoroCycleSize = value;
-	return this;
 }
 
 int Settings::getShortBreakLength() const
@@ -36,10 +52,9 @@ int Settings::getShortBreakLength() const
 	return shortBreakLength;
 }
 
-Settings * Settings::setShortBreakLength(int value)
+void Settings::setShortBreakLength(int value)
 {
 	shortBreakLength = value;
-	return this;
 }
 
 int Settings::getLongBreakLength() const
@@ -47,9 +62,8 @@ int Settings::getLongBreakLength() const
 	return longBreakLength;
 }
 
-Settings * Settings::setLongBreakLength(int value)
+void Settings::setLongBreakLength(int value)
 {
 	longBreakLength = value;
-	return this;
 }
 

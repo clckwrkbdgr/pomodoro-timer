@@ -14,6 +14,7 @@ public:
 private slots:
 	void changeState(int event);
 private:
+	// TODO Changing setting in runtime.
 	Ui::MainWindow ui;
 	Pomodoro * pomodoro;
 	QLineEdit * editTest;
