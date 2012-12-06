@@ -38,14 +38,8 @@ MainWindow::MainWindow(QWidget * parent)
 	pomodoro = new Pomodoro(this);
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 
-	QHBoxLayout * hbox = new QHBoxLayout();
-	editTest = new QLineEdit();
-	hbox->addWidget(editTest);
-	QPushButton * button;
-	button = new QPushButton(tr("Start/interrupt"));
-	connect(button, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
-	hbox->addWidget(button);
-	setLayout(hbox);
+	ui.setupUi(this);
+	connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
 
 	sounds = new Sounds(this);
 	sounds->loadSound("start", "beep-start.wav");
@@ -67,22 +61,22 @@ void MainWindow::changeState(int event)
 {
 	switch(event) {
 		case STARTED: 
-			editTest->setText(tr("Started"));
+			ui.state->setText(tr("Started"));
 			break;
 		case SHORT_BREAK: 
-			editTest->setText(tr("Short break"));
+			ui.state->setText(tr("Short break"));
 			sounds->playSound("start");
 			break;
 		case LONG_BREAK: 
-			editTest->setText(tr("Long break"));
+			ui.state->setText(tr("Long break"));
 			sounds->playSound("start");
 			break;
 		case BREAK_ENDED: 
-			editTest->setText(tr("Get ready"));
+			ui.state->setText(tr("Get ready"));
 			sounds->playSound("end");
 			break;
 		case INTERRUPTED: 
-			editTest->setText(tr("Interrupted"));
+			ui.state->setText(tr("Interrupted"));
 			break;
 		default:
 			break;
