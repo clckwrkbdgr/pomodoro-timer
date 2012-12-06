@@ -1,14 +1,14 @@
 #include <QtDebug>
 #include <QtCore/QTimer>
+#include "settings.h"
 #include "pomodoro.h"
 
-const int SECOND = 1000;
-const int MINUTE = 60 * SECOND;
-
-const int POMODORO_LENGTH = 1 * SECOND;
-const int POMODORO_CYCLE_SIZE = 2;
-const int SHORT_BREAK_LENGTH = 1 * SECOND;
-const int LONG_BREAK_LENGTH = 3 * SECOND;
+//const int SECOND = 1000;
+//const int MINUTE = 60 * SECOND;
+//const int POMODORO_LENGTH = 1 * SECOND;
+//const int POMODORO_CYCLE_SIZE = 2;
+//const int SHORT_BREAK_LENGTH = 1 * SECOND;
+//const int LONG_BREAK_LENGTH = 3 * SECOND;
 /*
 const int POMODORO_LENGTH = 25 * MINUTES;
 const int POMODORO_CYCLE_SIZE = 4;
@@ -19,6 +19,7 @@ const int LONG_BREAK_LENGTH = 20 * MINUTES;
 Pomodoro::Pomodoro(QObject * parent)
 	: QObject(parent), finishedPomodoroCount(0)
 {
+	settings = new Settings(this);
 	pomodoroTimer = new QTimer(this);
 }
 
@@ -42,7 +43,7 @@ void Pomodoro::startOrInterrupt()
 
 void Pomodoro::startPomodoro()
 {
-	restartTimer(POMODORO_LENGTH, SLOT(startBreak()));
+	restartTimer(settings->getPomodoroLength(), SLOT(startBreak()));
 	emit stateChanged(STARTED);
 }
 
@@ -50,7 +51,7 @@ void Pomodoro::startBreak()
 {
 	++finishedPomodoroCount;
 	bool isShortBreak = true;
-	if(finishedPomodoroCount >= POMODORO_CYCLE_SIZE) {
+	if(finishedPomodoroCount >= settings->getPomodoroCycleSize()) {
 		isShortBreak = false;
 		finishedPomodoroCount = 0;
 	}
@@ -65,13 +66,13 @@ void Pomodoro::startBreak()
 void Pomodoro::startShortBreak()
 {
 	emit stateChanged(SHORT_BREAK);
-	restartTimer(SHORT_BREAK_LENGTH, SLOT(getReady()));
+	restartTimer(settings->getShortBreakLength(), SLOT(getReady()));
 }
 
 void Pomodoro::startLongBreak()
 {
 	emit stateChanged(LONG_BREAK);
-	restartTimer(LONG_BREAK_LENGTH, SLOT(getReady()));
+	restartTimer(settings->getLongBreakLength(), SLOT(getReady()));
 }
 
 void Pomodoro::getReady()

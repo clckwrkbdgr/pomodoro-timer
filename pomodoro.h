@@ -1,6 +1,7 @@
 #pragma once
 #include <QtCore/QObject>
 class QTimer;
+class Settings;
 
 class Pomodoro : public QObject {
 	Q_OBJECT
@@ -10,10 +11,11 @@ public:
 
 	Pomodoro(QObject * parent = 0);
 	virtual ~Pomodoro() {}
-signals:
-	void stateChanged(int event);
 public slots:
 	void startOrInterrupt();
+signals:
+	void stateChanged(int event);
+
 private slots:
 	void startPomodoro();
 	void startBreak();
@@ -23,6 +25,7 @@ private slots:
 	void interruptPomodoro();
 private:
 	void restartTimer(int interval, const char * slot);
+	Settings * settings;
 	int finishedPomodoroCount;
 	QTimer * pomodoroTimer;
 };
