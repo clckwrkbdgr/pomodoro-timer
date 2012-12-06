@@ -10,6 +10,7 @@
 #include <QtGui/QFormLayout>
 #include <QtCore/QFileInfo>
 #include <QtGui/QSound>
+#include "pomodoro.h"
 #include "sounds.h"
 #include "mainwindow.h"
 
@@ -25,20 +26,6 @@ const QString TEXT = MainWindow::tr(
 		"If you want to interrupt current pomodoro, click on the tray icon.<br>"
 		"It will run a short break after which interrupted pomodoro will be started anew.<br>"
 		);
-const int SECOND = 1000;
-const int MINUTE = 60 * SECOND;
-
-const int POMODORO_LENGTH = 1 * SECOND;
-const int POMODORO_CYCLE_SIZE = 2;
-const int SHORT_BREAK_LENGTH = 1 * SECOND;
-const int LONG_BREAK_LENGTH = 3 * SECOND;
-/*
-const int POMODORO_LENGTH = 25 * MINUTES;
-const int POMODORO_CYCLE_SIZE = 4;
-const int SHORT_BREAK_LENGTH = 5 * MINUTES;
-const int LONG_BREAK_LENGTH = 20 * MINUTES;
-*/
-
 MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
 {
@@ -48,20 +35,21 @@ MainWindow::MainWindow(QWidget * parent)
 	if(settings.value("mainwindow/maximized", false).toBool())
 		setWindowState(Qt::WindowMaximized);
 
+	pomodoro = new Pomodoro(this);
+	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
+
 	QHBoxLayout * hbox = new QHBoxLayout();
 	editTest = new QLineEdit();
 	hbox->addWidget(editTest);
 	QPushButton * button;
 	button = new QPushButton(tr("Start/interrupt"));
-	connect(button, SIGNAL(clicked()), this, SLOT(startOrInterrupt()));
+	connect(button, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
 	hbox->addWidget(button);
 	setLayout(hbox);
 
 	sounds = new Sounds(this);
 	sounds->loadSound("start", "beep-start.wav");
 	sounds->loadSound("end", "beep-end.wav");
-
-	finishedPomodoroCount = 0;
 }
 
 MainWindow::~MainWindow()
@@ -75,89 +63,29 @@ MainWindow::~MainWindow()
 	}
 }
 
-void MainWindow::startOrInterrupt()
+void MainWindow::changeState(int event)
 {
-	if(pomodoroTimer.isActive()) {
-		interruptPomodoro();
-	} else {
-		startPomodoro();
+	switch(event) {
+		case STARTED: 
+			editTest->setText(tr("Started"));
+			break;
+		case SHORT_BREAK: 
+			editTest->setText(tr("Short break"));
+			sounds->playSound("start");
+			break;
+		case LONG_BREAK: 
+			editTest->setText(tr("Long break"));
+			sounds->playSound("start");
+			break;
+		case BREAK_ENDED: 
+			editTest->setText(tr("Get ready"));
+			sounds->playSound("end");
+			break;
+		case INTERRUPTED: 
+			editTest->setText(tr("Interrupted"));
+			break;
+		default:
+			break;
 	}
-	qDebug() << tr("Start or interrupt") << getStatus();
-}
-
-void MainWindow::startPomodoro()
-{
-	editTest->setText(tr("Started"));
-	pomodoroTimer.setInterval(POMODORO_LENGTH);
-	pomodoroTimer.setSingleShot(true);
-	pomodoroTimer.disconnect();
-	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(startBreak()));
-	pomodoroTimer.start();
-	qDebug() << tr("Start pomodoro") << getStatus();
-}
-
-void MainWindow::startBreak()
-{
-	++finishedPomodoroCount;
-	bool isShortBreak = true;
-	if(finishedPomodoroCount >= POMODORO_CYCLE_SIZE) {
-		isShortBreak = false;
-		finishedPomodoroCount = 0;
-	}
-
-	sounds->playSound("start");
-	if(isShortBreak) {
-		startShortBreak();
-	} else {
-		startLongBreak();
-	}
-	qDebug() << tr("startBreak") << getStatus();
-}
-
-void MainWindow::startShortBreak()
-{
-	editTest->setText(tr("Short break"));
-	// TODO Simplify timer work.
-	pomodoroTimer.setInterval(SHORT_BREAK_LENGTH);
-	pomodoroTimer.setSingleShot(true);
-	pomodoroTimer.disconnect();
-	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
-	pomodoroTimer.start();
-	qDebug() << tr("startShortBreak") << getStatus();
-}
-
-void MainWindow::startLongBreak()
-{
-	editTest->setText(tr("Long break"));
-	// @todo Move SM stuff to another class.
-	pomodoroTimer.setInterval(LONG_BREAK_LENGTH);
-	pomodoroTimer.setSingleShot(true);
-	pomodoroTimer.disconnect();
-	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
-	pomodoroTimer.start();
-	qDebug() << tr("startLongBreak") << getStatus();
-}
-
-void MainWindow::getReady()
-{
-	editTest->setText(tr("Get ready"));
-	qDebug() << tr("getReady") << getStatus();
-	sounds->playSound("end");
-}
-
-void MainWindow::interruptPomodoro()
-{
-	editTest->setText(tr("Interrupted"));
-	pomodoroTimer.stop();
-	qDebug() << tr("interruptPomodoro") << getStatus();
-}
-
-QString MainWindow::getStatus()
-{
-	return tr("Pomodoro: %2 for %3, finished: %1")
-		.arg(finishedPomodoroCount)
-		.arg(pomodoroTimer.isActive())
-		.arg(pomodoroTimer.interval())
-		;
 }
 

@@ -1,13 +1,10 @@
 #pragma once
 
 #include <QtGui/QWidget>
-#include <QtCore/QTimer>
 
-class QTextBrowser;
-class QUrl;
 class QLineEdit;
-class Mix_Chunk;
 class Sounds;
+class Pomodoro;
 
 class MainWindow : public QWidget {
 	Q_OBJECT
@@ -16,17 +13,9 @@ public:
 	MainWindow(QWidget * parent = 0);
 	virtual ~MainWindow();
 private slots:
-	void startOrInterrupt();
-	void startPomodoro();
-	void startBreak();
-	void startShortBreak();
-	void startLongBreak();
-	void getReady();
-	void interruptPomodoro();
+	void changeState(int event);
 private:
-	QString getStatus();
-	int finishedPomodoroCount;
+	Pomodoro * pomodoro;
 	QLineEdit * editTest;
-	QTimer pomodoroTimer;
 	Sounds * sounds;
 };
