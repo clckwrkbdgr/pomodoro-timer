@@ -7,6 +7,7 @@ class QTextBrowser;
 class QUrl;
 class QLineEdit;
 class Mix_Chunk;
+class Sounds;
 
 class MainWindow : public QWidget {
 	Q_OBJECT
@@ -27,6 +28,5 @@ private:
 	int finishedPomodoroCount;
 	QLineEdit * editTest;
 	QTimer pomodoroTimer;
-	Mix_Chunk * soundStart;
-	Mix_Chunk * soundEnd;
+	Sounds * sounds;
 };

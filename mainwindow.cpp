@@ -10,8 +10,7 @@
 #include <QtGui/QFormLayout>
 #include <QtCore/QFileInfo>
 #include <QtGui/QSound>
-#include <SDL/SDL.h>
-#include <SDL/SDL_mixer.h>
+#include "sounds.h"
 #include "mainwindow.h"
 
 const QString TEXT = MainWindow::tr(
@@ -26,55 +25,19 @@ const QString TEXT = MainWindow::tr(
 		"If you want to interrupt current pomodoro, click on the tray icon.<br>"
 		"It will run a short break after which interrupted pomodoro will be started anew.<br>"
 		);
-const int POMODORO_LENGTH = 25; // minutes.
+const int SECOND = 1000;
+const int MINUTE = 60 * SECOND;
+
+const int POMODORO_LENGTH = 1 * SECOND;
+const int POMODORO_CYCLE_SIZE = 2;
+const int SHORT_BREAK_LENGTH = 1 * SECOND;
+const int LONG_BREAK_LENGTH = 3 * SECOND;
+/*
+const int POMODORO_LENGTH = 25 * MINUTES;
 const int POMODORO_CYCLE_SIZE = 4;
-const int SHORT_BREAK_LENGTH = 5; // minutes.
-const int LONG_BREAK_LENGTH = 20; // minutes.
-
-void initSDL()
-{
-	if(SDL_Init(SDL_INIT_AUDIO) != 0) {
-		qDebug() << MainWindow::tr("Unable to initialize SDL: %1").arg(SDL_GetError());
-		return;
-	}
-
-	int audio_rate = 22050;
-	Uint16 audio_format = AUDIO_S16SYS;
-	int audio_channels = 2;
-	int audio_buffers = 4096;
-
-	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) {
-		qDebug() << MainWindow::tr("Unable to initialize audio: %1").arg(Mix_GetError());
-	}
-}
-
-void closeSDL()
-{
-	Mix_CloseAudio();
-	SDL_Quit();
-}
-
-Mix_Chunk * loadSound(const QString & fileName)
-{
-	Mix_Chunk *sound = NULL;
-	sound = Mix_LoadWAV(fileName.toAscii().constData());
-	if(sound == NULL) {
-		qDebug() << MainWindow::tr("Unable to load WAV file: %1").arg(Mix_GetError());
-	}
-	return sound;
-}
-
-bool playSound(Mix_Chunk * sound)
-{
-	int channel;
-	 
-	channel = Mix_PlayChannel(-1, sound, 0);
-	if(channel == -1) {
-		qDebug() << MainWindow::tr("Unable to play WAV file: %1").arg(Mix_GetError());
-		return false;
-	}
-	return true;
-}
+const int SHORT_BREAK_LENGTH = 5 * MINUTES;
+const int LONG_BREAK_LENGTH = 20 * MINUTES;
+*/
 
 MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
@@ -94,9 +57,9 @@ MainWindow::MainWindow(QWidget * parent)
 	hbox->addWidget(button);
 	setLayout(hbox);
 
-	initSDL();
-	soundStart = loadSound("beep-start.wav");
-	soundEnd = loadSound("beep-end.wav");
+	sounds = new Sounds(this);
+	sounds->loadSound("start", "beep-start.wav");
+	sounds->loadSound("end", "beep-end.wav");
 
 	finishedPomodoroCount = 0;
 }
@@ -110,10 +73,6 @@ MainWindow::~MainWindow()
 		settings.setValue("mainwindow/size", size());
 		settings.setValue("mainwindow/pos", pos());
 	}
-
-	Mix_FreeChunk(soundStart);
-	Mix_FreeChunk(soundEnd);
-	closeSDL();
 }
 
 void MainWindow::startOrInterrupt()
@@ -126,18 +85,16 @@ void MainWindow::startOrInterrupt()
 	qDebug() << tr("Start or interrupt") << getStatus();
 }
 
-
 void MainWindow::startPomodoro()
 {
 	editTest->setText(tr("Started"));
-	pomodoroTimer.setInterval(POMODORO_LENGTH * 60 * 1000);
+	pomodoroTimer.setInterval(POMODORO_LENGTH);
 	pomodoroTimer.setSingleShot(true);
 	pomodoroTimer.disconnect();
 	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(startBreak()));
 	pomodoroTimer.start();
 	qDebug() << tr("Start pomodoro") << getStatus();
 }
-
 
 void MainWindow::startBreak()
 {
@@ -148,7 +105,7 @@ void MainWindow::startBreak()
 		finishedPomodoroCount = 0;
 	}
 
-	playSound(soundStart);
+	sounds->playSound("start");
 	if(isShortBreak) {
 		startShortBreak();
 	} else {
@@ -157,11 +114,11 @@ void MainWindow::startBreak()
 	qDebug() << tr("startBreak") << getStatus();
 }
 
-
 void MainWindow::startShortBreak()
 {
 	editTest->setText(tr("Short break"));
-	pomodoroTimer.setInterval(SHORT_BREAK_LENGTH * 60 * 1000);
+	// TODO Simplify timer work.
+	pomodoroTimer.setInterval(SHORT_BREAK_LENGTH);
 	pomodoroTimer.setSingleShot(true);
 	pomodoroTimer.disconnect();
 	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
@@ -169,11 +126,11 @@ void MainWindow::startShortBreak()
 	qDebug() << tr("startShortBreak") << getStatus();
 }
 
-
 void MainWindow::startLongBreak()
 {
 	editTest->setText(tr("Long break"));
-	pomodoroTimer.setInterval(LONG_BREAK_LENGTH * 60 * 1000);
+	// @todo Move SM stuff to another class.
+	pomodoroTimer.setInterval(LONG_BREAK_LENGTH);
 	pomodoroTimer.setSingleShot(true);
 	pomodoroTimer.disconnect();
 	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
@@ -185,7 +142,7 @@ void MainWindow::getReady()
 {
 	editTest->setText(tr("Get ready"));
 	qDebug() << tr("getReady") << getStatus();
-	playSound(soundEnd);
+	sounds->playSound("end");
 }
 
 void MainWindow::interruptPomodoro()
