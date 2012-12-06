@@ -1,7 +1,5 @@
 #pragma once
-
 #include <QtGui/QWidget>
-
 class QLineEdit;
 class Sounds;
 class Pomodoro;

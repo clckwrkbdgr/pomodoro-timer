@@ -1,4 +1,5 @@
 #include <QtDebug>
+#include <QtCore/QTimer>
 #include "pomodoro.h"
 
 const int SECOND = 1000;
@@ -15,25 +16,33 @@ const int SHORT_BREAK_LENGTH = 5 * MINUTES;
 const int LONG_BREAK_LENGTH = 20 * MINUTES;
 */
 
+Pomodoro::Pomodoro(QObject * parent)
+	: QObject(parent), finishedPomodoroCount(0)
+{
+	pomodoroTimer = new QTimer(this);
+}
+
+void Pomodoro::restartTimer(int interval, const char * slot)
+{
+	pomodoroTimer->setInterval(interval);
+	pomodoroTimer->setSingleShot(true);
+	pomodoroTimer->disconnect();
+	connect(pomodoroTimer, SIGNAL(timeout()), this, slot);
+	pomodoroTimer->start();
+}
 
 void Pomodoro::startOrInterrupt()
 {
-	if(pomodoroTimer.isActive()) {
+	if(pomodoroTimer->isActive()) {
 		interruptPomodoro();
 	} else {
 		startPomodoro();
 	}
-	qDebug() << tr("Start or interrupt") << getStatus();
 }
 
 void Pomodoro::startPomodoro()
 {
-	pomodoroTimer.setInterval(POMODORO_LENGTH);
-	pomodoroTimer.setSingleShot(true);
-	pomodoroTimer.disconnect();
-	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(startBreak()));
-	pomodoroTimer.start();
-	qDebug() << tr("Start pomodoro") << getStatus();
+	restartTimer(POMODORO_LENGTH, SLOT(startBreak()));
 	emit stateChanged(STARTED);
 }
 
@@ -51,53 +60,29 @@ void Pomodoro::startBreak()
 	} else {
 		startLongBreak();
 	}
-	qDebug() << tr("startBreak") << getStatus();
 }
 
 void Pomodoro::startShortBreak()
 {
 	emit stateChanged(SHORT_BREAK);
-	// TODO Simplify timer work.
-	pomodoroTimer.setInterval(SHORT_BREAK_LENGTH);
-	pomodoroTimer.setSingleShot(true);
-	pomodoroTimer.disconnect();
-	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
-	pomodoroTimer.start();
-	qDebug() << tr("startShortBreak") << getStatus();
+	restartTimer(SHORT_BREAK_LENGTH, SLOT(getReady()));
 }
 
 void Pomodoro::startLongBreak()
 {
 	emit stateChanged(LONG_BREAK);
-	// @todo Move SM stuff to another class.
-	pomodoroTimer.setInterval(LONG_BREAK_LENGTH);
-	pomodoroTimer.setSingleShot(true);
-	pomodoroTimer.disconnect();
-	connect(&pomodoroTimer, SIGNAL(timeout()), this, SLOT(getReady()));
-	pomodoroTimer.start();
-	qDebug() << tr("startLongBreak") << getStatus();
+	restartTimer(LONG_BREAK_LENGTH, SLOT(getReady()));
 }
 
 void Pomodoro::getReady()
 {
 	emit stateChanged(BREAK_ENDED);
-	qDebug() << tr("getReady") << getStatus();
 }
 
 void Pomodoro::interruptPomodoro()
 {
 	emit stateChanged(INTERRUPTED);
-	pomodoroTimer.stop();
-	qDebug() << tr("interruptPomodoro") << getStatus();
-}
-
-QString Pomodoro::getStatus()
-{
-	return tr("Pomodoro: %2 for %3, finished: %1")
-		.arg(finishedPomodoroCount)
-		.arg(pomodoroTimer.isActive())
-		.arg(pomodoroTimer.interval())
-		;
+	pomodoroTimer->stop();
 }
 
 

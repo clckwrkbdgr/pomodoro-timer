@@ -1,5 +1,6 @@
 #pragma once
-#include <QtCore/QTimer>
+#include <QtCore/QObject>
+class QTimer;
 
 enum { NONE, STARTED, SHORT_BREAK, LONG_BREAK, BREAK_ENDED, INTERRUPTED };
 
@@ -7,7 +8,7 @@ class Pomodoro : public QObject {
 	Q_OBJECT
 	Q_DISABLE_COPY(Pomodoro)
 public:
-	Pomodoro(QObject * parent = 0) : QObject(parent), finishedPomodoroCount(0) {}
+	Pomodoro(QObject * parent = 0);
 	virtual ~Pomodoro() {}
 signals:
 	void stateChanged(int event);
@@ -21,8 +22,8 @@ private slots:
 	void getReady();
 	void interruptPomodoro();
 private:
-	QString getStatus();
+	void restartTimer(int interval, const char * slot);
 	int finishedPomodoroCount;
-	QTimer pomodoroTimer;
+	QTimer * pomodoroTimer;
 };
 

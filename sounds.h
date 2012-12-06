@@ -8,9 +8,6 @@ public:
 	Sounds(QObject * parent = 0);
 	virtual ~Sounds();
 
-	//void initSDL();
-	//void closeSDL();
-
 	bool loadSound(const QString & sound, const QString & fileName);
 	bool playSound(const QString & sound);
 private:
