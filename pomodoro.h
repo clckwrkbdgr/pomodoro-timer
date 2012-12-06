@@ -2,12 +2,12 @@
 #include <QtCore/QObject>
 class QTimer;
 
-enum { NONE, STARTED, SHORT_BREAK, LONG_BREAK, BREAK_ENDED, INTERRUPTED };
-
 class Pomodoro : public QObject {
 	Q_OBJECT
 	Q_DISABLE_COPY(Pomodoro)
 public:
+	enum { NONE, STARTED, SHORT_BREAK, LONG_BREAK, BREAK_ENDED, INTERRUPTED };
+
 	Pomodoro(QObject * parent = 0);
 	virtual ~Pomodoro() {}
 signals:

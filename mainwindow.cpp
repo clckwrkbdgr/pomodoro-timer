@@ -60,22 +60,22 @@ MainWindow::~MainWindow()
 void MainWindow::changeState(int event)
 {
 	switch(event) {
-		case STARTED: 
+		case Pomodoro::STARTED: 
 			ui.state->setText(tr("Started"));
 			break;
-		case SHORT_BREAK: 
+		case Pomodoro::SHORT_BREAK: 
 			ui.state->setText(tr("Short break"));
 			sounds->playSound("start");
 			break;
-		case LONG_BREAK: 
+		case Pomodoro::LONG_BREAK: 
 			ui.state->setText(tr("Long break"));
 			sounds->playSound("start");
 			break;
-		case BREAK_ENDED: 
+		case Pomodoro::BREAK_ENDED: 
 			ui.state->setText(tr("Get ready"));
 			sounds->playSound("end");
 			break;
-		case INTERRUPTED: 
+		case Pomodoro::INTERRUPTED: 
 			ui.state->setText(tr("Interrupted"));
 			break;
 		default:
