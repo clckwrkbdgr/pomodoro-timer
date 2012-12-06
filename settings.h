@@ -8,7 +8,7 @@ public:
 	virtual ~Settings() {}
 
 	void load();
-	void save();
+	void save() const;
 
 	int getPomodoroLength() const;
 	void setPomodoroLength(int value);

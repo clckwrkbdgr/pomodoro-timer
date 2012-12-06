@@ -73,6 +73,17 @@ void Pomodoro::interruptPomodoro()
 	pomodoroTimer->stop();
 }
 
+const Settings & Pomodoro::getSettings() const
+{
+	return settings;
+}
+
+void Pomodoro::setSettings(const Settings & newSettings)
+{
+	settings = newSettings;
+	interruptPomodoro();
+}
+
 #ifdef POMODORO_TEST
 class TestPomodoro : public QObject{
 	Q_OBJECT

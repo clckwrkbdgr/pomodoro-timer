@@ -27,25 +27,27 @@ const QString TEXT = MainWindow::tr(
 		"If you want to interrupt current pomodoro, click on the tray icon.<br>"
 		"It will run a short break after which interrupted pomodoro will be started anew.<br>"
 		);
+
+void setDebugSettings(Settings & settings)
+{
+	settings.setPomodoroLength(1 * Settings::SECOND);
+	settings.setPomodoroCycleSize(3);
+	settings.setShortBreakLength(1 * Settings::SECOND);
+	settings.setLongBreakLength(2 * Settings::SECOND);
+}
+
 MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
 {
-	QSettings settings;
-	resize(settings.value("mainwindow/size", size()).toSize());
-	move(settings.value("mainwindow/pos", pos()).toPoint());
-	if(settings.value("mainwindow/maximized", false).toBool())
-		setWindowState(Qt::WindowMaximized);
-
-	Settings pomodoroSettings;
-	//pomodoroSettings.load();
-	pomodoroSettings.setPomodoroLength(1 * Settings::SECOND);
-	pomodoroSettings.setPomodoroCycleSize(3);
-	pomodoroSettings.setShortBreakLength(1 * Settings::SECOND);
-	pomodoroSettings.setLongBreakLength(2 * Settings::SECOND);
-	pomodoro = new Pomodoro(pomodoroSettings, this);
-	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
-
 	ui.setupUi(this);
+	restoreWindowState();
+
+	Settings settings;
+	settings.load();
+	//setDebugSettings(pomodoroSettings);
+	updateDescription(settings);
+	pomodoro = new Pomodoro(settings, this);
+	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 	connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
 
 	sounds = new Sounds(this);
@@ -55,8 +57,71 @@ MainWindow::MainWindow(QWidget * parent)
 
 MainWindow::~MainWindow()
 {
-	//pomodoroSettings.save();
+	pomodoro->getSettings().save();
+	saveWindowState();
+}
 
+void MainWindow::updateDescription(const Settings & settings)
+{
+	ui.description->setText(
+			tr("Pomodoro length: %1 minutes.\nCycle size: %2.\nShort break: %3 minutes.\nLong break: %4 minutes.")
+			.arg(settings.getPomodoroLength() / Settings::MINUTE)
+			.arg(settings.getPomodoroCycleSize())
+			.arg(settings.getShortBreakLength() / Settings::MINUTE)
+			.arg(settings.getLongBreakLength() / Settings::MINUTE)
+			);
+}
+
+void MainWindow::on_pomodoroLength_clicked()
+{
+	Settings settings = pomodoro->getSettings();
+	bool ok = false;
+	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New pomodoro length in minutes:"), settings.getPomodoroLength() / Settings::MINUTE, 1, 60, 1, &ok);
+	if(ok) {
+		settings.setPomodoroLength(newValue * Settings::MINUTE);
+		pomodoro->setSettings(settings);
+		updateDescription(settings);
+	}
+}
+
+void MainWindow::on_pomodoroCycleSize_clicked()
+{
+	Settings settings = pomodoro->getSettings();
+	bool ok = false;
+	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New pomodoro cycle size:"), settings.getPomodoroCycleSize(), 1, 10, 1, &ok);
+	if(ok) {
+		settings.setPomodoroCycleSize(newValue);
+		pomodoro->setSettings(settings);
+		updateDescription(settings);
+	}
+}
+
+void MainWindow::on_shortBreakLength_clicked()
+{
+	Settings settings = pomodoro->getSettings();
+	bool ok = false;
+	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New short break length in minutes:"), settings.getShortBreakLength() / Settings::MINUTE, 1, 60, 1, &ok);
+	if(ok) {
+		settings.setShortBreakLength(newValue * Settings::MINUTE);
+		pomodoro->setSettings(settings);
+		updateDescription(settings);
+	}
+}
+
+void MainWindow::on_longBreakLength_clicked()
+{
+	Settings settings = pomodoro->getSettings();
+	bool ok = false;
+	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New long break length in minutes:"), settings.getLongBreakLength() / Settings::MINUTE, 1, 60, 1, &ok);
+	if(ok) {
+		settings.setLongBreakLength(newValue * Settings::MINUTE);
+		pomodoro->setSettings(settings);
+		updateDescription(settings);
+	}
+}
+
+void MainWindow::saveWindowState()
+{
 	QSettings settings;
 	settings.setValue("mainwindow/maximized", windowState().testFlag(Qt::WindowMaximized));
 	if(!windowState().testFlag(Qt::WindowMaximized))
@@ -64,6 +129,15 @@ MainWindow::~MainWindow()
 		settings.setValue("mainwindow/size", size());
 		settings.setValue("mainwindow/pos", pos());
 	}
+}
+
+void MainWindow::restoreWindowState()
+{
+	QSettings settings;
+	resize(settings.value("mainwindow/size", size()).toSize());
+	move(settings.value("mainwindow/pos", pos()).toPoint());
+	if(settings.value("mainwindow/maximized", false).toBool())
+		setWindowState(Qt::WindowMaximized);
 }
 
 void MainWindow::changeState(int event)

@@ -18,7 +18,7 @@ void Settings::load()
 	longBreakLength = settings.value("pomodoro/longbreaklength", longBreakLength).toInt();
 }
 
-void Settings::save()
+void Settings::save() const
 {
 	QSettings settings;
 	settings.setValue("pomodoro/pomodorolength", pomodoroLength);

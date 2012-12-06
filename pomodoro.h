@@ -12,6 +12,9 @@ public:
 
 	Pomodoro(const Settings & settings, QObject * parent = 0);
 	virtual ~Pomodoro() {}
+
+	const Settings & getSettings() const;
+	void setSettings(const Settings & newSettings);
 public slots:
 	void startOrInterrupt();
 signals:
