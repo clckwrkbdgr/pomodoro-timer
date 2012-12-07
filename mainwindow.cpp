@@ -43,12 +43,18 @@ MainWindow::MainWindow(QWidget * parent)
 	restoreWindowState();
 
 	Settings settings;
-	settings.load();
-	//setDebugSettings(pomodoroSettings);
+	//settings.load();
+	setDebugSettings(settings);
 	updateDescription(settings);
 	pomodoro = new Pomodoro(settings, this);
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 	connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
+
+	icons["start"] = QPixmap("start.png");
+	icons["pause"] = QPixmap("pause.png");
+	icons["break"] = QPixmap("break.png");
+	icons["ready"] = QPixmap("ready.png");
+	icons["interrupted"] = QPixmap("interrupted.png");
 
 	sounds = new Sounds(this);
 	sounds->loadSound("start", "beep-start.wav");
@@ -57,7 +63,7 @@ MainWindow::MainWindow(QWidget * parent)
 
 MainWindow::~MainWindow()
 {
-	pomodoro->getSettings().save();
+	//pomodoro->getSettings().save();
 	saveWindowState();
 }
 
@@ -144,22 +150,27 @@ void MainWindow::changeState(int event)
 {
 	switch(event) {
 		case Pomodoro::STARTED: 
-			ui.state->setText(tr("Started"));
+			ui.icon->setPixmap(icons["start"]);
+			ui.state->setText(tr("Started")); // TODO Icon - Play: >
 			break;
 		case Pomodoro::SHORT_BREAK: 
-			ui.state->setText(tr("Short break"));
+			ui.icon->setPixmap(icons["pause"]);
+			ui.state->setText(tr("Short break")); // TODO Icon - Pause: ||
 			sounds->playSound("start");
 			break;
 		case Pomodoro::LONG_BREAK: 
-			ui.state->setText(tr("Long break"));
+			ui.icon->setPixmap(icons["break"]);
+			ui.state->setText(tr("Long break")); // TODO Icon - coffee cup
 			sounds->playSound("start");
 			break;
 		case Pomodoro::BREAK_ENDED: 
-			ui.state->setText(tr("Get ready"));
+			ui.icon->setPixmap(icons["ready"]);
+			ui.state->setText(tr("Get ready")); // TODO Icon - V mark. Probably flashing - ! mark.
 			sounds->playSound("end");
 			break;
 		case Pomodoro::INTERRUPTED: 
-			ui.state->setText(tr("Interrupted"));
+			ui.icon->setPixmap(icons["interrupted"]);
+			ui.state->setText(tr("Interrupted")); // TODO Icon - X
 			break;
 		default:
 			break;

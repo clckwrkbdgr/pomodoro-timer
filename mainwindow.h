@@ -22,6 +22,7 @@ private:
 	Ui::MainWindow ui;
 	Pomodoro * pomodoro;
 	Sounds * sounds;
+	QMap<QString, QPixmap> icons;
 	void saveWindowState();
 	void restoreWindowState();
 };
