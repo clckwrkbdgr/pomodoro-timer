@@ -74,6 +74,20 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="startSound">
+         <property name="text">
+          <string>Start break sound</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="endSound">
+         <property name="text">
+          <string>End break sound</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>

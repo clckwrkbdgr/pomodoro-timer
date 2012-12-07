@@ -18,10 +18,17 @@ public:
 	void setShortBreakLength(int value);
 	int getLongBreakLength() const;
 	void setLongBreakLength(int value);
+
+	const QString & getStartSound() const;
+	void setStartSound(const QString & value);
+	const QString & getEndSound() const;
+	void setEndSound(const QString & value);
 private:
 	int pomodoroLength;
 	int pomodoroCycleSize;
 	int shortBreakLength;
 	int longBreakLength;
+	QString startSound;
+	QString endSound;
 };
 

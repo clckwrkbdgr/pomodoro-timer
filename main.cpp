@@ -8,7 +8,5 @@ int main(int argc, char ** argv)
 	app.setApplicationName("pomodoro");
 
 	MainWindow wnd;
-	wnd.show();
-	wnd.hide();
 	return app.exec();
 }

@@ -14,6 +14,7 @@ POMODORO_TEST {
 } else {
 	unix:LIBS += -lSDL -lSDL_mixer
 	FORMS = mainwindow.ui
+	RESOURCES = pomodoro.qrc
 	SOURCES = main.cpp
 	modules = mainwindow sounds pomodoro settings
 	for(module, modules) {

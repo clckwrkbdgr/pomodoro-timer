@@ -23,14 +23,12 @@ const bool DEBUG = true;
 const bool DEBUG = false;
 #endif//DEBUG
 
-Settings makeDebugSettings()
+void makeDebugSettings(Settings & settings)
 {
-	Settings settings;
 	settings.setPomodoroLength(1 * Settings::SECOND);
 	settings.setPomodoroCycleSize(3);
 	settings.setShortBreakLength(1 * Settings::SECOND);
 	settings.setLongBreakLength(2 * Settings::SECOND);
-	return settings;
 }
 
 const QString TEXT = MainWindow::tr(
@@ -52,22 +50,24 @@ MainWindow::MainWindow(QWidget * parent)
 	ui.setupUi(this);
 	restoreWindowState();
 
-	icons["start"] = QPixmap("start.png");
-	icons["pause"] = QPixmap("pause.png");
-	icons["break"] = QPixmap("break.png");
-	icons["ready"] = QPixmap("ready.png");
-	icons["interrupted"] = QPixmap("interrupted.png");
+	icons["start"] = QPixmap(":/res/icons/start.png");
+	icons["pause"] = QPixmap(":/res/icons/pause.png");
+	icons["break"] = QPixmap(":/res/icons/break.png");
+	icons["ready"] = QPixmap(":/res/icons/ready.png");
+	icons["interrupted"] = QPixmap(":/res/icons/interrupted.png");
 
-	sounds = new Sounds(this);
-	sounds->loadSound("start", "beep-start.wav");
-	sounds->loadSound("end", "beep-end.wav");
 
 	Settings settings;
 	settings.load();
 	if(DEBUG) {
-		settings = makeDebugSettings();
+		makeDebugSettings(settings);
 	}
 	updateDescription(settings);
+
+	sounds = new Sounds(this);
+	sounds->loadSound("start", settings.getStartSound());
+	sounds->loadSound("end", settings.getEndSound());
+
 	pomodoro = new Pomodoro(settings, this);
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 	connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
@@ -83,6 +83,11 @@ MainWindow::MainWindow(QWidget * parent)
 	connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activateFromTray(QSystemTrayIcon::ActivationReason)));
 
 	changeState(Pomodoro::NONE);
+	if(DEBUG) {
+		show();
+	} else {
+		hide();
+	}
 }
 
 MainWindow::~MainWindow()
@@ -108,12 +113,38 @@ void MainWindow::toggleVisibility()
 void MainWindow::updateDescription(const Settings & settings)
 {
 	ui.description->setText(
-			tr("Pomodoro length: %1 minutes.\nCycle size: %2.\nShort break: %3 minutes.\nLong break: %4 minutes.")
+			tr("Pomodoro length: %1 minutes.\nCycle size: %2.\nShort break: %3 minutes.\nLong break: %4 minutes.\nStart break sound: %5.\nEnd break sound: %6.")
 			.arg(settings.getPomodoroLength() / Settings::MINUTE)
 			.arg(settings.getPomodoroCycleSize())
 			.arg(settings.getShortBreakLength() / Settings::MINUTE)
 			.arg(settings.getLongBreakLength() / Settings::MINUTE)
+			.arg(settings.getStartSound())
+			.arg(settings.getEndSound())
 			);
+}
+
+void MainWindow::on_startSound_clicked()
+{
+	Settings settings = pomodoro->getSettings();
+	QString newValue = QFileDialog::getOpenFileName(this, tr("New start break sound..."), settings.getStartSound());
+	if(!newValue.isEmpty()) {
+		settings.setStartSound(newValue);
+		sounds->loadSound("start", settings.getStartSound());
+		pomodoro->setSettings(settings);
+		updateDescription(settings);
+	}
+}
+
+void MainWindow::on_endSound_clicked()
+{
+	Settings settings = pomodoro->getSettings();
+	QString newValue = QFileDialog::getOpenFileName(this, tr("New end break sound..."), settings.getEndSound());
+	if(!newValue.isEmpty()) {
+		settings.setEndSound(newValue);
+		sounds->loadSound("end", settings.getEndSound());
+		pomodoro->setSettings(settings);
+		updateDescription(settings);
+	}
 }
 
 void MainWindow::on_pomodoroLength_clicked()

@@ -16,6 +16,8 @@ void Settings::load()
 	pomodoroCycleSize = settings.value("pomodoro/pomodorocyclesize", pomodoroCycleSize).toInt();
 	shortBreakLength = settings.value("pomodoro/shortbreaklength", shortBreakLength).toInt();
 	longBreakLength = settings.value("pomodoro/longbreaklength", longBreakLength).toInt();
+	startSound = settings.value("sounds/start", startSound).toString();
+	endSound = settings.value("sounds/end", endSound).toString();
 }
 
 void Settings::save() const
@@ -25,6 +27,8 @@ void Settings::save() const
 	settings.setValue("pomodoro/pomodorocyclesize", pomodoroCycleSize);
 	settings.setValue("pomodoro/shortbreaklength", shortBreakLength);
 	settings.setValue("pomodoro/longbreaklength", longBreakLength);
+	settings.value("sounds/start", startSound);
+	settings.value("sounds/end", endSound);
 }
 
 int Settings::getPomodoroLength() const
@@ -65,5 +69,25 @@ int Settings::getLongBreakLength() const
 void Settings::setLongBreakLength(int value)
 {
 	longBreakLength = value;
+}
+
+const QString & Settings::getStartSound() const
+{
+	return startSound;
+}
+
+void Settings::setStartSound(const QString & value)
+{
+	startSound = value;
+}
+
+const QString & Settings::getEndSound() const
+{
+	return endSound;
+}
+
+void Settings::setEndSound(const QString & value)
+{
+	endSound = value;
 }
 

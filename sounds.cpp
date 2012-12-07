@@ -1,4 +1,5 @@
 #include <QtDebug>
+#include <QtCore/QFile>
 #include "sounds.h"
 
 Sounds::Sounds(QObject * parent)
@@ -31,8 +32,9 @@ Sounds::~Sounds()
 
 Mix_Chunk * Sounds::loadSound(const QString & fileName)
 {
-	Mix_Chunk *sound = NULL;
-	sound = Mix_LoadWAV(fileName.toAscii().constData());
+	if(fileName.isEmpty())
+		return NULL;
+	Mix_Chunk * sound = Mix_LoadWAV(fileName.toAscii().constData());
 	if(sound == NULL) {
 		qDebug() << QObject::tr("Unable to load WAV file: %1").arg(Mix_GetError());
 	}
@@ -41,6 +43,9 @@ Mix_Chunk * Sounds::loadSound(const QString & fileName)
 
 bool Sounds::playSound(Mix_Chunk * sound)
 {
+	if(sound == NULL)
+		return false;
+
 	int channel;
 	 
 	channel = Mix_PlayChannel(-1, sound, 0);

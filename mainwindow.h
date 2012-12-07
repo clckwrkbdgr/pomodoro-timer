@@ -13,11 +13,14 @@ public:
 	MainWindow(QWidget * parent = 0);
 	virtual ~MainWindow();
 private slots:
-	void changeState(int event);
 	void on_pomodoroLength_clicked();
 	void on_pomodoroCycleSize_clicked();
 	void on_shortBreakLength_clicked();
 	void on_longBreakLength_clicked();
+	void on_startSound_clicked();
+	void on_endSound_clicked();
+
+	void changeState(int event);
 	void updateDescription(const Settings & settings);
 	void toggleVisibility();
 	void activateFromTray(QSystemTrayIcon::ActivationReason reason);
