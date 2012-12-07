@@ -2,6 +2,7 @@
 #include <QtCore/QSettings>
 #include <QtGui/QPushButton>
 #include <QtCore/QUrl>
+#include <QtGui/QMenu>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QTextBrowser>
 #include <QtGui/QInputDialog>
@@ -51,6 +52,16 @@ MainWindow::MainWindow(QWidget * parent)
 	ui.setupUi(this);
 	restoreWindowState();
 
+	icons["start"] = QPixmap("start.png");
+	icons["pause"] = QPixmap("pause.png");
+	icons["break"] = QPixmap("break.png");
+	icons["ready"] = QPixmap("ready.png");
+	icons["interrupted"] = QPixmap("interrupted.png");
+
+	sounds = new Sounds(this);
+	sounds->loadSound("start", "beep-start.wav");
+	sounds->loadSound("end", "beep-end.wav");
+
 	Settings settings;
 	settings.load();
 	if(DEBUG) {
@@ -61,15 +72,17 @@ MainWindow::MainWindow(QWidget * parent)
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 	connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
 
-	icons["start"] = QPixmap("start.png");
-	icons["pause"] = QPixmap("pause.png");
-	icons["break"] = QPixmap("break.png");
-	icons["ready"] = QPixmap("ready.png");
-	icons["interrupted"] = QPixmap("interrupted.png");
+	tray = new QSystemTrayIcon(this);
+	QMenu * trayMenu = new QMenu(this);
+	trayMenu->addAction(tr("Start/interrupt"), pomodoro, SLOT(startOrInterrupt()));
+	trayMenu->addSeparator();
+	trayMenu->addAction(tr("Settings..."), this, SLOT(toggleVisibility()));
+	trayMenu->addSeparator();
+	trayMenu->addAction(tr("Quit"), this, SLOT(close()));
+	tray->setContextMenu(trayMenu);
+	connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activateFromTray(QSystemTrayIcon::ActivationReason)));
 
-	sounds = new Sounds(this);
-	sounds->loadSound("start", "beep-start.wav");
-	sounds->loadSound("end", "beep-end.wav");
+	changeState(Pomodoro::NONE);
 }
 
 MainWindow::~MainWindow()
@@ -78,6 +91,18 @@ MainWindow::~MainWindow()
 		pomodoro->getSettings().save();
 	}
 	saveWindowState();
+}
+
+void MainWindow::activateFromTray(QSystemTrayIcon::ActivationReason reason)
+{
+	if(reason == QSystemTrayIcon::Trigger) {
+		pomodoro->startOrInterrupt();
+	}
+}
+
+void MainWindow::toggleVisibility()
+{
+	setVisible(!isVisible());
 }
 
 void MainWindow::updateDescription(const Settings & settings)
@@ -164,29 +189,35 @@ void MainWindow::changeState(int event)
 	switch(event) {
 		case Pomodoro::STARTED: 
 			ui.icon->setPixmap(icons["start"]);
-			ui.state->setText(tr("Started")); // TODO Icon - Play: >
+			ui.state->setText(tr("Started"));
 			break;
 		case Pomodoro::SHORT_BREAK: 
 			ui.icon->setPixmap(icons["pause"]);
-			ui.state->setText(tr("Short break")); // TODO Icon - Pause: ||
+			ui.state->setText(tr("Short break"));
 			sounds->playSound("start");
 			break;
 		case Pomodoro::LONG_BREAK: 
 			ui.icon->setPixmap(icons["break"]);
-			ui.state->setText(tr("Long break")); // TODO Icon - coffee cup
+			ui.state->setText(tr("Long break"));
 			sounds->playSound("start");
 			break;
 		case Pomodoro::BREAK_ENDED: 
 			ui.icon->setPixmap(icons["ready"]);
-			ui.state->setText(tr("Get ready")); // TODO Icon - V mark. Probably flashing - ! mark.
+			ui.state->setText(tr("Get ready"));
 			sounds->playSound("end");
 			break;
 		case Pomodoro::INTERRUPTED: 
 			ui.icon->setPixmap(icons["interrupted"]);
-			ui.state->setText(tr("Interrupted")); // TODO Icon - X
+			ui.state->setText(tr("Interrupted"));
 			break;
 		default:
+			ui.icon->setPixmap(icons["ready"]);
+			ui.state->setText(tr("Get ready"));
 			break;
 	}
+	tray->setIcon(*ui.icon->pixmap());
+	tray->setToolTip(ui.state->text());
+
+	tray->show();
 }
 

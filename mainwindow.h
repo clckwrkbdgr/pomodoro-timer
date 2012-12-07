@@ -1,5 +1,6 @@
 #pragma once
 #include <QtGui/QWidget>
+#include <QtGui/QSystemTrayIcon>
 #include "ui_mainwindow.h"
 class Sounds;
 class Pomodoro;
@@ -18,11 +19,14 @@ private slots:
 	void on_shortBreakLength_clicked();
 	void on_longBreakLength_clicked();
 	void updateDescription(const Settings & settings);
+	void toggleVisibility();
+	void activateFromTray(QSystemTrayIcon::ActivationReason reason);
 private:
 	Ui::MainWindow ui;
 	Pomodoro * pomodoro;
 	Sounds * sounds;
 	QMap<QString, QPixmap> icons;
+	QSystemTrayIcon * tray;
 	void saveWindowState();
 	void restoreWindowState();
 };
