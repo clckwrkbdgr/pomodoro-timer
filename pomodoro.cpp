@@ -1,5 +1,4 @@
 #include <QtDebug>
-#include <QtTest/QtTest>
 #include <QtCore/QTimer>
 #include "pomodoro.h"
 
@@ -84,7 +83,9 @@ void Pomodoro::setSettings(const Settings & newSettings)
 	interruptPomodoro();
 }
 
+//! Use `qmake "CONFIG+=POMODORO_TEST" to use debug mode.
 #ifdef POMODORO_TEST
+#include <QtTest/QtTest>
 class TestPomodoro : public QObject{
 	Q_OBJECT
 private slots:
@@ -182,4 +183,4 @@ private:
 
 QTEST_MAIN(TestPomodoro)
 #include "pomodoro.moc"
-#endif
+#endif//POMODORO_TEST

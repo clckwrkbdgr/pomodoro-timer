@@ -3,7 +3,6 @@
 #include "settings.h"
 class QTimer;
 
-
 class Pomodoro : public QObject {
 	Q_OBJECT
 	Q_DISABLE_COPY(Pomodoro)

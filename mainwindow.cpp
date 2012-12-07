@@ -15,6 +15,23 @@
 #include "sounds.h"
 #include "mainwindow.h"
 
+//! Use `qmake "CONFIG+=debug" to use debug mode.
+#ifdef QT_DEBUG
+const bool DEBUG = true;
+#else//not DEBUG
+const bool DEBUG = false;
+#endif//DEBUG
+
+Settings makeDebugSettings()
+{
+	Settings settings;
+	settings.setPomodoroLength(1 * Settings::SECOND);
+	settings.setPomodoroCycleSize(3);
+	settings.setShortBreakLength(1 * Settings::SECOND);
+	settings.setLongBreakLength(2 * Settings::SECOND);
+	return settings;
+}
+
 const QString TEXT = MainWindow::tr(
 		"Pomodoro lasts for <a href='#1'>%1</a> minutes followed up by a short break for <a href='#2'>%2</a> minutes.<br>"
 		"Every <a href='#3'>%3</a> pomodoros a long break for <a href='#4'>%4</a> minutes should be taken.<br>"
@@ -28,14 +45,6 @@ const QString TEXT = MainWindow::tr(
 		"It will run a short break after which interrupted pomodoro will be started anew.<br>"
 		);
 
-void setDebugSettings(Settings & settings)
-{
-	settings.setPomodoroLength(1 * Settings::SECOND);
-	settings.setPomodoroCycleSize(3);
-	settings.setShortBreakLength(1 * Settings::SECOND);
-	settings.setLongBreakLength(2 * Settings::SECOND);
-}
-
 MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
 {
@@ -43,8 +52,10 @@ MainWindow::MainWindow(QWidget * parent)
 	restoreWindowState();
 
 	Settings settings;
-	//settings.load();
-	setDebugSettings(settings);
+	settings.load();
+	if(DEBUG) {
+		settings = makeDebugSettings();
+	}
 	updateDescription(settings);
 	pomodoro = new Pomodoro(settings, this);
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
@@ -63,7 +74,9 @@ MainWindow::MainWindow(QWidget * parent)
 
 MainWindow::~MainWindow()
 {
-	//pomodoro->getSettings().save();
+	if(!DEBUG) {
+		pomodoro->getSettings().save();
+	}
 	saveWindowState();
 }
 
