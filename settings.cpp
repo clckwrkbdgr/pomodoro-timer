@@ -27,8 +27,8 @@ void Settings::save() const
 	settings.setValue("pomodoro/pomodorocyclesize", pomodoroCycleSize);
 	settings.setValue("pomodoro/shortbreaklength", shortBreakLength);
 	settings.setValue("pomodoro/longbreaklength", longBreakLength);
-	settings.value("sounds/start", startSound);
-	settings.value("sounds/end", endSound);
+	settings.setValue("sounds/start", startSound);
+	settings.setValue("sounds/end", endSound);
 }
 
 int Settings::getPomodoroLength() const
