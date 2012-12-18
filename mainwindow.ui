@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="icon">
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -36,11 +36,18 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="statistics">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="description">
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
        </property>
       </widget>
      </item>

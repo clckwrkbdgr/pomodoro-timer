@@ -47,6 +47,22 @@ const QString TEXT = MainWindow::tr(
 MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
 {
+	eventIcons[Pomodoro::STARTED    ] = "start";
+	eventIcons[Pomodoro::SHORT_BREAK] = "pause";
+	eventIcons[Pomodoro::LONG_BREAK ] = "break";
+	eventIcons[Pomodoro::BREAK_ENDED] = "ready";
+	eventIcons[Pomodoro::INTERRUPTED] = "interrupted";
+
+	eventSounds[Pomodoro::SHORT_BREAK] = "start";
+	eventSounds[Pomodoro::LONG_BREAK ] = "start";
+	eventSounds[Pomodoro::BREAK_ENDED] = "end";
+
+	eventNames[Pomodoro::STARTED    ] = tr("Started");
+	eventNames[Pomodoro::SHORT_BREAK] = tr("Short break");
+	eventNames[Pomodoro::LONG_BREAK ] = tr("Long break");
+	eventNames[Pomodoro::BREAK_ENDED] = tr("Get ready");
+	eventNames[Pomodoro::INTERRUPTED] = tr("Interrupted");
+
 	ui.setupUi(this);
 	restoreWindowState();
 
@@ -55,7 +71,6 @@ MainWindow::MainWindow(QWidget * parent)
 	icons["break"] = QPixmap(":/res/icons/break.png");
 	icons["ready"] = QPixmap(":/res/icons/ready.png");
 	icons["interrupted"] = QPixmap(":/res/icons/interrupted.png");
-
 
 	Settings settings;
 	settings.load();
@@ -217,36 +232,25 @@ void MainWindow::restoreWindowState()
 
 void MainWindow::changeState(int event)
 {
-	switch(event) {
-		case Pomodoro::STARTED: 
-			ui.icon->setPixmap(icons["start"]);
-			ui.state->setText(tr("Started"));
-			break;
-		case Pomodoro::SHORT_BREAK: 
-			ui.icon->setPixmap(icons["pause"]);
-			ui.state->setText(tr("Short break"));
-			sounds->playSound("start");
-			break;
-		case Pomodoro::LONG_BREAK: 
-			ui.icon->setPixmap(icons["break"]);
-			ui.state->setText(tr("Long break"));
-			sounds->playSound("start");
-			break;
-		case Pomodoro::BREAK_ENDED: 
-			ui.icon->setPixmap(icons["ready"]);
-			ui.state->setText(tr("Get ready"));
-			sounds->playSound("end");
-			break;
-		case Pomodoro::INTERRUPTED: 
-			ui.icon->setPixmap(icons["interrupted"]);
-			ui.state->setText(tr("Interrupted"));
-			break;
-		default:
-			ui.icon->setPixmap(icons["ready"]);
-			ui.state->setText(tr("Get ready"));
-			break;
+	ui.statistics->setText(
+			tr("Total pomodoros taken: %1\nComplete cycles taken: %2")
+			.arg(pomodoro->totalPomodorosTaken())
+			.arg(pomodoro->completeCyclesTaken())
+			);
+
+	QString soundName = eventSounds[event];
+	if(!soundName.isEmpty()) {
+		sounds->playSound(soundName);
 	}
-	tray->setIcon(*ui.icon->pixmap());
+
+	QString iconName = eventIcons.contains(event) ? eventIcons[event] : "ready";
+	ui.icon->setPixmap(icons[iconName]);
+	if(ui.icon->pixmap()) {
+		tray->setIcon(*ui.icon->pixmap());
+	}
+
+	QString stateName = eventNames.contains(event) ? eventNames[event] : tr("Get ready");
+	ui.state->setText(stateName);
 	tray->setToolTip(ui.state->text());
 
 	tray->show();

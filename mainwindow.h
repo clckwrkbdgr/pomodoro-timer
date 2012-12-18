@@ -32,4 +32,8 @@ private:
 	QSystemTrayIcon * tray;
 	void saveWindowState();
 	void restoreWindowState();
+
+	QMap<int, QString> eventIcons;
+	QMap<int, QString> eventSounds;
+	QMap<int, QString> eventNames;
 };
