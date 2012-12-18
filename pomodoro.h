@@ -14,6 +14,9 @@ public:
 
 	const Settings & getSettings() const;
 	void setSettings(const Settings & newSettings);
+
+	int totalPomodorosTaken() const { return pomodoroCount; }
+	int completeCyclesTaken() const { return cycleCount; }
 public slots:
 	void startOrInterrupt();
 signals:
@@ -30,6 +33,7 @@ private:
 	void restartTimer(int interval, const char * slot);
 	Settings settings;
 	int finishedPomodoroCount;
+	int pomodoroCount, cycleCount;
 	QTimer * pomodoroTimer;
 };
 

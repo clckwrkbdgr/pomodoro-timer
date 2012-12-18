@@ -3,7 +3,7 @@
 #include "pomodoro.h"
 
 Pomodoro::Pomodoro(const Settings & settings, QObject * parent)
-	: QObject(parent), finishedPomodoroCount(0)
+	: QObject(parent), finishedPomodoroCount(0), pomodoroCount(0), cycleCount(0)
 {
 	this->settings = settings;
 	pomodoroTimer = new QTimer(this);
@@ -36,6 +36,8 @@ void Pomodoro::startPomodoro()
 void Pomodoro::startBreak()
 {
 	++finishedPomodoroCount;
+	++pomodoroCount;
+
 	bool isShortBreak = true;
 	if(finishedPomodoroCount >= settings.getPomodoroCycleSize()) {
 		isShortBreak = false;
@@ -57,6 +59,7 @@ void Pomodoro::startShortBreak()
 
 void Pomodoro::startLongBreak()
 {
+	++cycleCount;
 	emit stateChanged(LONG_BREAK);
 	restartTimer(settings.getLongBreakLength(), SLOT(getReady()));
 }
@@ -86,7 +89,7 @@ void Pomodoro::setSettings(const Settings & newSettings)
 //! Use `qmake "CONFIG+=POMODORO_TEST" to use debug mode.
 #ifdef POMODORO_TEST
 #include <QtTest/QtTest>
-class TestPomodoro : public QObject{
+class TestPomodoro : public QObject {
 	Q_OBJECT
 private slots:
 	void initTestCase() {
@@ -172,6 +175,39 @@ private slots:
 		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
 		waitForSignal.exec();
 		checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
+	}
+	void totalPomodoroCountAndCycleCountIncrease() {
+		Pomodoro pomodoro(debugSettings);
+		QEventLoop waitForSignal;
+		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
+
+		Q_ASSERT(debugSettings.getPomodoroCycleSize() == 3);
+		QCOMPARE(pomodoro.totalPomodorosTaken(), 0);
+		QCOMPARE(pomodoro.completeCyclesTaken(), 0);
+
+		pomodoro.startOrInterrupt();
+		waitForSignal.exec(); // Wait for short break.
+		QCOMPARE(pomodoro.totalPomodorosTaken(), 1);
+		QCOMPARE(pomodoro.completeCyclesTaken(), 0);
+		waitForSignal.exec(); // Wait for break end.
+
+		pomodoro.startOrInterrupt();
+		waitForSignal.exec(); // Wait for short break.
+		QCOMPARE(pomodoro.totalPomodorosTaken(), 2);
+		QCOMPARE(pomodoro.completeCyclesTaken(), 0);
+		waitForSignal.exec(); // Wait for break end.
+
+		pomodoro.startOrInterrupt();
+		waitForSignal.exec(); // Wait for long break; one cycle is complete.
+		QCOMPARE(pomodoro.totalPomodorosTaken(), 3);
+		QCOMPARE(pomodoro.completeCyclesTaken(), 1);
+		waitForSignal.exec(); // Wait for break end.
+
+		pomodoro.startOrInterrupt();
+		waitForSignal.exec(); // Wait for short break.
+		QCOMPARE(pomodoro.totalPomodorosTaken(), 4);
+		QCOMPARE(pomodoro.completeCyclesTaken(), 1);
+		waitForSignal.exec(); // Wait for break end.
 	}
 private:
 	Settings debugSettings;
