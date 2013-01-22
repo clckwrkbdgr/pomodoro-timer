@@ -3,11 +3,14 @@
 #include "settings.h"
 class QTimer;
 
+// TODO Remove short/long break distiction.
+// TODO Remove cycle counting.
+
 class Pomodoro : public QObject {
 	Q_OBJECT
 	Q_DISABLE_COPY(Pomodoro)
 public:
-	enum { NONE, STARTED, SHORT_BREAK, LONG_BREAK, BREAK_ENDED, INTERRUPTED };
+	enum { NONE, STARTED, SHORT_BREAK, BREAK_ENDED, INTERRUPTED };
 
 	Pomodoro(const Settings & settings, QObject * parent = 0);
 	virtual ~Pomodoro() {}
@@ -16,7 +19,6 @@ public:
 	void setSettings(const Settings & newSettings);
 
 	int totalPomodorosTaken() const { return pomodoroCount; }
-	int completeCyclesTaken() const { return cycleCount; }
 public slots:
 	void startOrInterrupt();
 signals:
@@ -26,14 +28,13 @@ private slots:
 	void startPomodoro();
 	void startBreak();
 	void startShortBreak();
-	void startLongBreak();
 	void getReady();
 	void interruptPomodoro();
 private:
 	void restartTimer(int interval, const char * slot);
 	Settings settings;
 	int finishedPomodoroCount;
-	int pomodoroCount, cycleCount;
+	int pomodoroCount;
 	QTimer * pomodoroTimer;
 };
 
