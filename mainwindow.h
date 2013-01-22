@@ -14,9 +14,7 @@ public:
 	virtual ~MainWindow();
 private slots:
 	void on_pomodoroLength_clicked();
-	void on_pomodoroCycleSize_clicked();
 	void on_shortBreakLength_clicked();
-	void on_longBreakLength_clicked();
 	void on_startSound_clicked();
 	void on_endSound_clicked();
 
