@@ -48,18 +48,15 @@ MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
 {
 	eventIcons[Pomodoro::STARTED    ] = "start";
-	eventIcons[Pomodoro::SHORT_BREAK] = "pause";
-	eventIcons[Pomodoro::LONG_BREAK ] = "break";
+	eventIcons[Pomodoro::SHORT_BREAK] = "break";
 	eventIcons[Pomodoro::BREAK_ENDED] = "ready";
 	eventIcons[Pomodoro::INTERRUPTED] = "interrupted";
 
 	eventSounds[Pomodoro::SHORT_BREAK] = "start";
-	eventSounds[Pomodoro::LONG_BREAK ] = "start";
 	eventSounds[Pomodoro::BREAK_ENDED] = "end";
 
 	eventNames[Pomodoro::STARTED    ] = tr("Started");
 	eventNames[Pomodoro::SHORT_BREAK] = tr("Short break");
-	eventNames[Pomodoro::LONG_BREAK ] = tr("Long break");
 	eventNames[Pomodoro::BREAK_ENDED] = tr("Get ready");
 	eventNames[Pomodoro::INTERRUPTED] = tr("Interrupted");
 
@@ -67,7 +64,6 @@ MainWindow::MainWindow(QWidget * parent)
 	restoreWindowState();
 
 	icons["start"] = QPixmap(":/res/icons/start.png");
-	icons["pause"] = QPixmap(":/res/icons/pause.png");
 	icons["break"] = QPixmap(":/res/icons/break.png");
 	icons["ready"] = QPixmap(":/res/icons/ready.png");
 	icons["interrupted"] = QPixmap(":/res/icons/interrupted.png");
@@ -233,9 +229,8 @@ void MainWindow::restoreWindowState()
 void MainWindow::changeState(int event)
 {
 	ui.statistics->setText(
-			tr("Total pomodoros taken: %1\nComplete cycles taken: %2")
+			tr("Total pomodoros taken: %1")
 			.arg(pomodoro->totalPomodorosTaken())
-			.arg(pomodoro->completeCyclesTaken())
 			);
 
 	QString soundName = eventSounds[event];
