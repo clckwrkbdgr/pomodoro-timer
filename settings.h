@@ -12,8 +12,8 @@ public:
 
 	int getPomodoroLength() const;
 	void setPomodoroLength(int value);
-	int getShortBreakLength() const;
-	void setShortBreakLength(int value);
+	int getBreakLength() const;
+	void setBreakLength(int value);
 
 	const QString & getStartSound() const;
 	void setStartSound(const QString & value);
@@ -21,7 +21,7 @@ public:
 	void setEndSound(const QString & value);
 private:
 	int pomodoroLength;
-	int shortBreakLength;
+	int breakLength;
 	QString startSound;
 	QString endSound;
 };

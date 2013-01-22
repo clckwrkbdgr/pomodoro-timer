@@ -30,20 +30,15 @@ void Pomodoro::startOrInterrupt()
 void Pomodoro::startPomodoro()
 {
 	restartTimer(settings.getPomodoroLength(), SLOT(startBreak()));
-	emit stateChanged(STARTED);
+	emit stateChanged(ON_RUN);
 }
 
 void Pomodoro::startBreak()
 {
 	++finishedPomodoroCount;
 	++pomodoroCount;
-	startShortBreak();
-}
-
-void Pomodoro::startShortBreak()
-{
-	emit stateChanged(SHORT_BREAK);
-	restartTimer(settings.getShortBreakLength(), SLOT(getReady()));
+	emit stateChanged(BREAK);
+	restartTimer(settings.getBreakLength(), SLOT(getReady()));
 }
 
 void Pomodoro::getReady()
@@ -76,38 +71,36 @@ class TestPomodoro : public QObject {
 private slots:
 	void initTestCase() {
 		debugSettings.setPomodoroLength(200);
-		debugSettings.setPomodoroCycleSize(3);
-		debugSettings.setShortBreakLength(100);
-		debugSettings.setLongBreakLength(300);
+		debugSettings.setBreakLength(100);
 	}
 	void pomodoroStarting() {
 		Pomodoro pomodoro(debugSettings);
 		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
 		pomodoro.startOrInterrupt();
 		QCOMPARE(spy.count(), 1);
-		QCOMPARE(spy.at(0).first().toInt(), int(Pomodoro::STARTED));
+		QCOMPARE(spy.at(0).first().toInt(), int(Pomodoro::ON_RUN));
 	}
-	void firstShortBreak() {
+	void firstBreak() {
 		Pomodoro pomodoro(debugSettings);
 		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
 		QEventLoop waitForSignal;
 		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
 
 		pomodoro.startOrInterrupt();
-		checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+		checkTheOnlyEventIs(Pomodoro::ON_RUN, spy);
 		waitForSignal.exec();
-		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+		checkTheOnlyEventIs(Pomodoro::BREAK, spy);
 	}
-	void getsReadyAfterShortBreak() {
+	void getsReadyAfterBreak() {
 		Pomodoro pomodoro(debugSettings);
 		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
 		QEventLoop waitForSignal;
 		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
 
 		pomodoro.startOrInterrupt();
-		checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+		checkTheOnlyEventIs(Pomodoro::ON_RUN, spy);
 		waitForSignal.exec();
-		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+		checkTheOnlyEventIs(Pomodoro::BREAK, spy);
 		waitForSignal.exec();
 		checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
 	}
@@ -118,16 +111,16 @@ private slots:
 		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
 
 		pomodoro.startOrInterrupt();
-		checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+		checkTheOnlyEventIs(Pomodoro::ON_RUN, spy);
 		waitForSignal.exec();
-		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+		checkTheOnlyEventIs(Pomodoro::BREAK, spy);
 		waitForSignal.exec();
 		checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
 
 		pomodoro.startOrInterrupt();
-		checkTheOnlyEventIs(Pomodoro::STARTED, spy);
+		checkTheOnlyEventIs(Pomodoro::ON_RUN, spy);
 		waitForSignal.exec();
-		checkTheOnlyEventIs(Pomodoro::SHORT_BREAK, spy);
+		checkTheOnlyEventIs(Pomodoro::BREAK, spy);
 		waitForSignal.exec();
 		checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
 	}
@@ -138,25 +131,12 @@ private slots:
 
 		QCOMPARE(pomodoro.totalPomodorosTaken(), 0);
 
-		pomodoro.startOrInterrupt();
-		waitForSignal.exec(); // Wait for short break.
-		QCOMPARE(pomodoro.totalPomodorosTaken(), 1);
-		waitForSignal.exec(); // Wait for break end.
-
-		pomodoro.startOrInterrupt();
-		waitForSignal.exec(); // Wait for short break.
-		QCOMPARE(pomodoro.totalPomodorosTaken(), 2);
-		waitForSignal.exec(); // Wait for break end.
-
-		pomodoro.startOrInterrupt();
-		waitForSignal.exec(); // Wait for long break; one cycle is complete.
-		QCOMPARE(pomodoro.totalPomodorosTaken(), 3);
-		waitForSignal.exec(); // Wait for break end.
-
-		pomodoro.startOrInterrupt();
-		waitForSignal.exec(); // Wait for short break.
-		QCOMPARE(pomodoro.totalPomodorosTaken(), 4);
-		waitForSignal.exec(); // Wait for break end.
+		for(int i = 0; i < 4; ++i) {
+			pomodoro.startOrInterrupt();
+			waitForSignal.exec(); // Wait for break.
+			QCOMPARE(pomodoro.totalPomodorosTaken(), i);
+			waitForSignal.exec(); // Wait for break end.
+		}
 	}
 private:
 	Settings debugSettings;

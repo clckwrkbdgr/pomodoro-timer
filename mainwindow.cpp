@@ -26,7 +26,7 @@ const bool DEBUG = false;
 void makeDebugSettings(Settings & settings)
 {
 	settings.setPomodoroLength(1 * Settings::SECOND);
-	settings.setShortBreakLength(1 * Settings::SECOND);
+	settings.setBreakLength(1 * Settings::SECOND);
 }
 
 const QString TEXT = MainWindow::tr(
@@ -45,16 +45,16 @@ const QString TEXT = MainWindow::tr(
 MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
 {
-	eventIcons[Pomodoro::STARTED    ] = "start";
-	eventIcons[Pomodoro::SHORT_BREAK] = "break";
+	eventIcons[Pomodoro::ON_RUN    ] = "start";
+	eventIcons[Pomodoro::BREAK] = "break";
 	eventIcons[Pomodoro::BREAK_ENDED] = "ready";
 	eventIcons[Pomodoro::INTERRUPTED] = "interrupted";
 
-	eventSounds[Pomodoro::SHORT_BREAK] = "start";
+	eventSounds[Pomodoro::BREAK] = "start";
 	eventSounds[Pomodoro::BREAK_ENDED] = "end";
 
-	eventNames[Pomodoro::STARTED    ] = tr("Started");
-	eventNames[Pomodoro::SHORT_BREAK] = tr("Short break");
+	eventNames[Pomodoro::ON_RUN    ] = tr("On run");
+	eventNames[Pomodoro::BREAK] = tr("Break");
 	eventNames[Pomodoro::BREAK_ENDED] = tr("Get ready");
 	eventNames[Pomodoro::INTERRUPTED] = tr("Interrupted");
 
@@ -122,9 +122,9 @@ void MainWindow::toggleVisibility()
 void MainWindow::updateDescription(const Settings & settings)
 {
 	ui.description->setText(
-			tr("Pomodoro length: %1 minutes.\nShort break: %2 minutes.\nStart break sound: %3.\nEnd break sound: %4.")
+			tr("Pomodoro length: %1 minutes.\nBreak: %2 minutes.\nStart break sound: %3.\nEnd break sound: %4.")
 			.arg(settings.getPomodoroLength() / Settings::MINUTE)
-			.arg(settings.getShortBreakLength() / Settings::MINUTE)
+			.arg(settings.getBreakLength() / Settings::MINUTE)
 			.arg(settings.getStartSound())
 			.arg(settings.getEndSound())
 			);
@@ -166,13 +166,13 @@ void MainWindow::on_pomodoroLength_clicked()
 	}
 }
 
-void MainWindow::on_shortBreakLength_clicked()
+void MainWindow::on_breakLength_clicked()
 {
 	Settings settings = pomodoro->getSettings();
 	bool ok = false;
-	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New short break length in minutes:"), settings.getShortBreakLength() / Settings::MINUTE, 1, 60, 1, &ok);
+	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New break length in minutes:"), settings.getBreakLength() / Settings::MINUTE, 1, 60, 1, &ok);
 	if(ok) {
-		settings.setShortBreakLength(newValue * Settings::MINUTE);
+		settings.setBreakLength(newValue * Settings::MINUTE);
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
