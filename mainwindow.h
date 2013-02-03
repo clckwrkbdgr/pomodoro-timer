@@ -25,14 +25,12 @@ private slots:
 private:
 	Ui::MainWindow ui;
 	Pomodoro * pomodoro;
-	Sounds * sounds;
 	QMap<QString, QPixmap> icons;
 	QSystemTrayIcon * tray;
 	void saveWindowState();
 	void restoreWindowState();
 
 	QMap<int, QString> eventIcons;
-	QMap<int, QString> eventSounds;
 	QMap<int, QString> eventExternalCommands;
 	QMap<int, QString> eventNames;
 };

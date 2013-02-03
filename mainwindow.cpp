@@ -54,9 +54,6 @@ MainWindow::MainWindow(QWidget * parent)
 	eventExternalCommands[Pomodoro::BREAK] = "aplay -q /home/antifin/beep-start.wav";
 	eventExternalCommands[Pomodoro::BREAK_ENDED] = "aplay -q /home/antifin/beep-end.wav";
 
-	eventSounds[Pomodoro::BREAK] = "start";
-	eventSounds[Pomodoro::BREAK_ENDED] = "end";
-
 	eventNames[Pomodoro::ON_RUN    ] = tr("On run");
 	eventNames[Pomodoro::BREAK] = tr("Break");
 	eventNames[Pomodoro::BREAK_ENDED] = tr("Get ready");
@@ -76,10 +73,6 @@ MainWindow::MainWindow(QWidget * parent)
 		makeDebugSettings(settings);
 	}
 	updateDescription(settings);
-
-	sounds = new Sounds(this);
-	sounds->loadSound("start", settings.getStartSound());
-	sounds->loadSound("end", settings.getEndSound());
 
 	pomodoro = new Pomodoro(settings, this);
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
@@ -140,7 +133,6 @@ void MainWindow::on_startSound_clicked()
 	QString newValue = QFileDialog::getOpenFileName(this, tr("New start break sound..."), settings.getStartSound());
 	if(!newValue.isEmpty()) {
 		settings.setStartSound(newValue);
-		sounds->loadSound("start", settings.getStartSound());
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
@@ -152,7 +144,6 @@ void MainWindow::on_endSound_clicked()
 	QString newValue = QFileDialog::getOpenFileName(this, tr("New end break sound..."), settings.getEndSound());
 	if(!newValue.isEmpty()) {
 		settings.setEndSound(newValue);
-		sounds->loadSound("end", settings.getEndSound());
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
