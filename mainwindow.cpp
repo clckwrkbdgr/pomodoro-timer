@@ -14,7 +14,6 @@
 #include <QtGui/QSound>
 #include "settings.h"
 #include "pomodoro.h"
-#include "sounds.h"
 #include "mainwindow.h"
 
 //! Use `qmake "CONFIG+=debug" to use debug mode.

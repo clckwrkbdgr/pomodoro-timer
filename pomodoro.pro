@@ -12,7 +12,6 @@ POMODORO_TEST {
 	SOURCES = pomodoro.cpp settings.cpp
 	HEADERS = pomodoro.h settings.h
 } else {
-	unix:LIBS += -lSDL -lSDL_mixer
 	FORMS = mainwindow.ui
 	RESOURCES = pomodoro.qrc
 	SOURCES = main.cpp
