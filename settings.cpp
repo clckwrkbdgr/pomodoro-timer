@@ -12,8 +12,8 @@ void Settings::load()
 	QSettings settings;
 	pomodoroLength = settings.value("pomodoro/pomodorolength", pomodoroLength).toInt();
 	breakLength = settings.value("pomodoro/breaklength", breakLength).toInt();
-	startSound = settings.value("sounds/start", startSound).toString();
-	endSound = settings.value("sounds/end", endSound).toString();
+	startCommand = settings.value("commands/start", startCommand).toString();
+	endCommand = settings.value("commands/end", endCommand).toString();
 }
 
 void Settings::save() const
@@ -21,8 +21,8 @@ void Settings::save() const
 	QSettings settings;
 	settings.setValue("pomodoro/pomodorolength", pomodoroLength);
 	settings.setValue("pomodoro/breaklength", breakLength);
-	settings.setValue("sounds/start", startSound);
-	settings.setValue("sounds/end", endSound);
+	settings.setValue("commands/start", startCommand);
+	settings.setValue("commands/end", endCommand);
 }
 
 int Settings::getPomodoroLength() const
@@ -45,23 +45,23 @@ void Settings::setBreakLength(int value)
 	breakLength = value;
 }
 
-const QString & Settings::getStartSound() const
+const QString & Settings::getStartCommand() const
 {
-	return startSound;
+	return startCommand;
 }
 
-void Settings::setStartSound(const QString & value)
+void Settings::setStartCommand(const QString & value)
 {
-	startSound = value;
+	startCommand = value;
 }
 
-const QString & Settings::getEndSound() const
+const QString & Settings::getEndCommand() const
 {
-	return endSound;
+	return endCommand;
 }
 
-void Settings::setEndSound(const QString & value)
+void Settings::setEndCommand(const QString & value)
 {
-	endSound = value;
+	endCommand = value;
 }
 

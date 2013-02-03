@@ -51,9 +51,6 @@ MainWindow::MainWindow(QWidget * parent)
 	eventIcons[Pomodoro::BREAK_ENDED] = "ready";
 	eventIcons[Pomodoro::INTERRUPTED] = "interrupted";
 
-	eventExternalCommands[Pomodoro::BREAK] = "aplay -q /home/antifin/beep-start.wav";
-	eventExternalCommands[Pomodoro::BREAK_ENDED] = "aplay -q /home/antifin/beep-end.wav";
-
 	eventNames[Pomodoro::ON_RUN    ] = tr("On run");
 	eventNames[Pomodoro::BREAK] = tr("Break");
 	eventNames[Pomodoro::BREAK_ENDED] = tr("Get ready");
@@ -119,20 +116,21 @@ void MainWindow::toggleVisibility()
 void MainWindow::updateDescription(const Settings & settings)
 {
 	ui.description->setText(
-			tr("Pomodoro length: %1 minutes.\nBreak: %2 minutes.\nStart break sound: %3.\nEnd break sound: %4.")
+			tr("Pomodoro length: %1 minutes.\nBreak: %2 minutes.\nStart break command: <%3>.\nEnd break command: <%4>.")
 			.arg(settings.getPomodoroLength() / Settings::MINUTE)
 			.arg(settings.getBreakLength() / Settings::MINUTE)
-			.arg(settings.getStartSound())
-			.arg(settings.getEndSound())
+			.arg(settings.getStartCommand())
+			.arg(settings.getEndCommand())
 			);
 }
 
 void MainWindow::on_startSound_clicked()
 {
 	Settings settings = pomodoro->getSettings();
-	QString newValue = QFileDialog::getOpenFileName(this, tr("New start break sound..."), settings.getStartSound());
+	QString newValue = QInputDialog::getText(this, tr("New start break command..."), 0, QLineEdit::Normal, settings.getStartCommand());
 	if(!newValue.isEmpty()) {
-		settings.setStartSound(newValue);
+		settings.setStartCommand(newValue);
+		eventExternalCommands[Pomodoro::BREAK] = newValue;
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
@@ -141,9 +139,10 @@ void MainWindow::on_startSound_clicked()
 void MainWindow::on_endSound_clicked()
 {
 	Settings settings = pomodoro->getSettings();
-	QString newValue = QFileDialog::getOpenFileName(this, tr("New end break sound..."), settings.getEndSound());
+	QString newValue = QInputDialog::getText(this, tr("New end break command..."), 0, QLineEdit::Normal, settings.getEndCommand());
 	if(!newValue.isEmpty()) {
-		settings.setEndSound(newValue);
+		settings.setEndCommand(newValue);
+		eventExternalCommands[Pomodoro::BREAK_ENDED] = newValue;
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
