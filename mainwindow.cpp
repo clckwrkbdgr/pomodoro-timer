@@ -1,5 +1,6 @@
 #include <QtDebug>
 #include <QtCore/QSettings>
+#include <QtCore/QProcess>
 #include <QtGui/QPushButton>
 #include <QtCore/QUrl>
 #include <QtGui/QMenu>
@@ -49,6 +50,9 @@ MainWindow::MainWindow(QWidget * parent)
 	eventIcons[Pomodoro::BREAK] = "break";
 	eventIcons[Pomodoro::BREAK_ENDED] = "ready";
 	eventIcons[Pomodoro::INTERRUPTED] = "interrupted";
+
+	eventExternalCommands[Pomodoro::BREAK] = "aplay -q /home/antifin/beep-start.wav";
+	eventExternalCommands[Pomodoro::BREAK_ENDED] = "aplay -q /home/antifin/beep-end.wav";
 
 	eventSounds[Pomodoro::BREAK] = "start";
 	eventSounds[Pomodoro::BREAK_ENDED] = "end";
@@ -205,9 +209,9 @@ void MainWindow::changeState(int event)
 			.arg(pomodoro->totalPomodorosTaken())
 			);
 
-	QString soundName = eventSounds[event];
-	if(!soundName.isEmpty()) {
-		sounds->playSound(soundName);
+	QString command = eventExternalCommands[event];
+	if(!command.isEmpty()) {
+		QProcess::startDetached(command);
 	}
 
 	QString iconName = eventIcons.contains(event) ? eventIcons[event] : "ready";

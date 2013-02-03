@@ -33,5 +33,6 @@ private:
 
 	QMap<int, QString> eventIcons;
 	QMap<int, QString> eventSounds;
+	QMap<int, QString> eventExternalCommands;
 	QMap<int, QString> eventNames;
 };
