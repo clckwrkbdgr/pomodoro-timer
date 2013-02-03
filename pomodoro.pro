@@ -16,7 +16,7 @@ POMODORO_TEST {
 	FORMS = mainwindow.ui
 	RESOURCES = pomodoro.qrc
 	SOURCES = main.cpp
-	modules = mainwindow sounds pomodoro settings
+	modules = mainwindow pomodoro settings
 	for(module, modules) {
 		HEADERS += $${module}.h
 		SOURCES += $${module}.cpp

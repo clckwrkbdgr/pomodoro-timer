@@ -130,7 +130,6 @@ void MainWindow::on_startSound_clicked()
 	QString newValue = QInputDialog::getText(this, tr("New start break command..."), 0, QLineEdit::Normal, settings.getStartCommand());
 	if(!newValue.isEmpty()) {
 		settings.setStartCommand(newValue);
-		eventExternalCommands[Pomodoro::BREAK] = newValue;
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
@@ -142,7 +141,6 @@ void MainWindow::on_endSound_clicked()
 	QString newValue = QInputDialog::getText(this, tr("New end break command..."), 0, QLineEdit::Normal, settings.getEndCommand());
 	if(!newValue.isEmpty()) {
 		settings.setEndCommand(newValue);
-		eventExternalCommands[Pomodoro::BREAK_ENDED] = newValue;
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
@@ -199,9 +197,10 @@ void MainWindow::changeState(int event)
 			.arg(pomodoro->totalPomodorosTaken())
 			);
 
-	QString command = eventExternalCommands[event];
-	if(!command.isEmpty()) {
-		QProcess::startDetached(command);
+	switch(event) {
+		case Pomodoro::BREAK: QProcess::startDetached(pomodoro->getSettings().getStartCommand()); break;
+		case Pomodoro::BREAK_ENDED: QProcess::startDetached(pomodoro->getSettings().getEndCommand()); break;
+		default: break;
 	}
 
 	QString iconName = eventIcons.contains(event) ? eventIcons[event] : "ready";

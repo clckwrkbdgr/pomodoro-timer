@@ -2,7 +2,6 @@
 #include <QtGui/QWidget>
 #include <QtGui/QSystemTrayIcon>
 #include "ui_mainwindow.h"
-class Sounds;
 class Pomodoro;
 class Settings;
 
