@@ -10,6 +10,9 @@ public:
 	void load();
 	void save() const;
 
+	bool getAutorestart() const;
+	void setAutorestart(bool value);
+
 	int getPomodoroLength() const;
 	void setPomodoroLength(int value);
 	int getBreakLength() const;
@@ -20,6 +23,7 @@ public:
 	const QString & getEndCommand() const;
 	void setEndCommand(const QString & value);
 private:
+	bool autorestart;
 	int pomodoroLength;
 	int breakLength;
 	QString startCommand;

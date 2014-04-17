@@ -16,6 +16,7 @@ private slots:
 	void on_breakLength_clicked();
 	void on_startSound_clicked();
 	void on_endSound_clicked();
+	void on_autorestart_clicked();
 
 	void changeState(int event);
 	void updateDescription(const Settings & settings);

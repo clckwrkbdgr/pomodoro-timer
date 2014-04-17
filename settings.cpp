@@ -2,7 +2,7 @@
 #include "settings.h"
 
 Settings::Settings()
-	: pomodoroLength(25 * MINUTE),
+	: autorestart(false), pomodoroLength(25 * MINUTE),
 	breakLength(5 * MINUTE)
 {
 }
@@ -10,6 +10,7 @@ Settings::Settings()
 void Settings::load()
 {
 	QSettings settings;
+	autorestart = settings.value("pomodoro/autorestart", autorestart).toBool();
 	pomodoroLength = settings.value("pomodoro/pomodorolength", pomodoroLength).toInt();
 	breakLength = settings.value("pomodoro/breaklength", breakLength).toInt();
 	startCommand = settings.value("commands/start", startCommand).toString();
@@ -19,10 +20,21 @@ void Settings::load()
 void Settings::save() const
 {
 	QSettings settings;
+	settings.setValue("pomodoro/autorestart", autorestart);
 	settings.setValue("pomodoro/pomodorolength", pomodoroLength);
 	settings.setValue("pomodoro/breaklength", breakLength);
 	settings.setValue("commands/start", startCommand);
 	settings.setValue("commands/end", endCommand);
+}
+
+bool Settings::getAutorestart() const
+{
+	return autorestart;
+}
+
+void Settings::setAutorestart(bool value)
+{
+	autorestart = value;
 }
 
 int Settings::getPomodoroLength() const

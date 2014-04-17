@@ -44,6 +44,9 @@ void Pomodoro::startBreak()
 void Pomodoro::getReady()
 {
 	emit stateChanged(BREAK_ENDED);
+	if(settings.getAutorestart()) {
+		startPomodoro();
+	}
 }
 
 void Pomodoro::interruptPomodoro()
@@ -104,6 +107,23 @@ private slots:
 		waitForSignal.exec();
 		checkTheOnlyEventIs(Pomodoro::BREAK_ENDED, spy);
 	}
+	void shouldRestartAfterBreakIfAutorestartIsOn() {
+		Settings newSettings = debugSettings;
+		newSettings.setAutorestart(true);
+		Pomodoro pomodoro(newSettings);
+		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
+		QEventLoop waitForSignal;
+		connect(&pomodoro, SIGNAL(stateChanged(int)), &waitForSignal, SLOT(quit()));
+
+		pomodoro.startOrInterrupt();
+		checkTheOnlyEventIs(Pomodoro::ON_RUN, spy);
+		waitForSignal.exec();
+		checkTheOnlyEventIs(Pomodoro::BREAK, spy);
+		waitForSignal.exec();
+		QCOMPARE(spy.count(), 2);
+		QCOMPARE(spy.takeFirst().first().toInt(), int(Pomodoro::BREAK_ENDED));
+		QCOMPARE(spy.takeFirst().first().toInt(), int(Pomodoro::ON_RUN));
+	}
 	void newBreakAfterNewPomodoro() {
 		Pomodoro pomodoro(debugSettings);
 		QSignalSpy spy(&pomodoro, SIGNAL(stateChanged(int)));
@@ -134,7 +154,7 @@ private slots:
 		for(int i = 0; i < 4; ++i) {
 			pomodoro.startOrInterrupt();
 			waitForSignal.exec(); // Wait for break.
-			QCOMPARE(pomodoro.totalPomodorosTaken(), i);
+			QCOMPARE(pomodoro.totalPomodorosTaken(), i + 1);
 			waitForSignal.exec(); // Wait for break end.
 		}
 	}

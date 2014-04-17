@@ -115,12 +115,27 @@ void MainWindow::toggleVisibility()
 void MainWindow::updateDescription(const Settings & settings)
 {
 	ui.description->setText(
-			tr("Pomodoro length: %1 minutes.\nBreak: %2 minutes.\nStart break command: <%3>.\nEnd break command: <%4>.")
+			tr(
+				"Pomodoro length: %1 minutes.\n"
+				"Break: %2 minutes.\n"
+				"Autorestart: %3.\n"
+				"Start break command: <%4>.\n"
+				"End break command: <%5>."
+				)
 			.arg(settings.getPomodoroLength() / Settings::MINUTE)
 			.arg(settings.getBreakLength() / Settings::MINUTE)
+			.arg(settings.getAutorestart() ? "on" : "off")
 			.arg(settings.getStartCommand())
 			.arg(settings.getEndCommand())
 			);
+}
+
+void MainWindow::on_autorestart_clicked()
+{
+	Settings settings = pomodoro->getSettings();
+	settings.setAutorestart(!settings.getAutorestart());
+	pomodoro->setSettings(settings);
+	updateDescription(settings);
 }
 
 void MainWindow::on_startSound_clicked()

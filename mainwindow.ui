@@ -54,6 +54,13 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
+        <widget class="QPushButton" name="autorestart">
+         <property name="text">
+          <string>Toggle autorestart</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pomodoroLength">
          <property name="text">
           <string>Pomodoro length</string>
