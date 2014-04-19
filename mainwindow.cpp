@@ -16,6 +16,13 @@
 #include "pomodoro.h"
 #include "mainwindow.h"
 
+namespace Icons {
+#include "res/icons/break.xpm"
+#include "res/icons/interrupted.xpm"
+#include "res/icons/ready.xpm"
+#include "res/icons/start.xpm"
+}
+
 //! Use `qmake "CONFIG+=debug" to use debug mode.
 #ifdef QT_DEBUG
 const bool DEBUG = true;

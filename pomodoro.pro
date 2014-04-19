@@ -6,6 +6,8 @@ MOC_DIR = tmp
 RCC_DIR = tmp
 UI_DIR = tmp
 
+LIBS += -lchthon2
+
 POMODORO_TEST {
 	DEFINES += POMODORO_TEST
 	QT += testlib
