@@ -1,3 +1,4 @@
+#include <iostream>
 #include <QtDebug>
 #include <QtCore/QSettings>
 #include <QtCore/QProcess>
@@ -12,6 +13,8 @@
 #include <QtGui/QFormLayout>
 #include <QtCore/QFileInfo>
 #include <QtGui/QSound>
+#include <chthon2/pixmap.h>
+#include <chthon2/util.h>
 #include "settings.h"
 #include "pomodoro.h"
 #include "mainwindow.h"
@@ -49,6 +52,26 @@ const QString TEXT = MainWindow::tr(
 		"It will run a short break after which interrupted pomodoro will be started anew.<br>"
 		);
 
+QImage load_xpm(const char * xpm [], int size)
+{
+	std::vector<std::string> xpm_lines(xpm, xpm + size);
+	QImage result;
+	try {
+		Chthon::Pixmap pixmap;
+		pixmap.load(xpm_lines);
+		result = QImage(pixmap.pixels.width(), pixmap.pixels.height(), QImage::Format_ARGB32);
+		for(unsigned x = 0; x < pixmap.pixels.width(); ++x) {
+			for(unsigned y = 0; y < pixmap.pixels.height(); ++y) {
+				Chthon::Color c = pixmap.palette[(pixmap.pixels.cell(x, y))];
+				result.setPixel(x, y, c);
+			}
+		}
+	} catch(const Chthon::Pixmap::Exception & e) {
+		std::cerr << e.what << std::endl;
+	}
+	return result;
+}
+
 MainWindow::MainWindow(QWidget * parent)
 	: QWidget(parent)
 {
@@ -65,10 +88,17 @@ MainWindow::MainWindow(QWidget * parent)
 	ui.setupUi(this);
 	restoreWindowState();
 
+	;
+	icons["start"] = QPixmap::fromImage(load_xpm(Icons::start_xpm, Chthon::size_of_array(Icons::start_xpm)));
+	icons["break"] = QPixmap::fromImage(load_xpm(Icons::break_xpm, Chthon::size_of_array(Icons::break_xpm)));
+	icons["ready"] = QPixmap::fromImage(load_xpm(Icons::ready_xpm, Chthon::size_of_array(Icons::ready_xpm)));
+	icons["interrupted"] = QPixmap::fromImage(load_xpm(Icons::interrupted_xpm, Chthon::size_of_array(Icons::interrupted_xpm)));
+	/*
 	icons["start"] = QPixmap(":/res/icons/start.png");
 	icons["break"] = QPixmap(":/res/icons/break.png");
 	icons["ready"] = QPixmap(":/res/icons/ready.png");
 	icons["interrupted"] = QPixmap(":/res/icons/interrupted.png");
+	*/
 
 	Settings settings;
 	settings.load();

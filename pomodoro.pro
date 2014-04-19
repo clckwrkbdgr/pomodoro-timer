@@ -6,6 +6,8 @@ MOC_DIR = tmp
 RCC_DIR = tmp
 UI_DIR = tmp
 
+QMAKE_CXXFLAGS += -std=c++11
+
 LIBS += -lchthon2
 
 POMODORO_TEST {
