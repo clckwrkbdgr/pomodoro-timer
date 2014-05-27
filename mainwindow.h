@@ -22,6 +22,7 @@ private slots:
 	void updateDescription(const Settings & settings);
 	void toggleVisibility();
 	void activateFromTray(QSystemTrayIcon::ActivationReason reason);
+	void changeTimeLeft(int msecs_left);
 private:
 	Ui::MainWindow ui;
 	Pomodoro * pomodoro;

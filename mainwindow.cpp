@@ -20,9 +20,13 @@
 #include "mainwindow.h"
 
 namespace Icons {
+const
 #include "res/icons/break.xpm"
+const
 #include "res/icons/interrupted.xpm"
+const
 #include "res/icons/ready.xpm"
+const
 #include "res/icons/start.xpm"
 }
 
@@ -110,6 +114,7 @@ MainWindow::MainWindow(QWidget * parent)
 	pomodoro = new Pomodoro(settings, this);
 	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 	connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
+	connect(pomodoro, SIGNAL(timeLeftChanged(int)), this, SLOT(changeTimeLeft(int)));
 
 	tray = new QSystemTrayIcon(this);
 	QMenu * trayMenu = new QMenu(this);
@@ -267,3 +272,9 @@ void MainWindow::changeState(int event)
 	tray->show();
 }
 
+void MainWindow::changeTimeLeft(int msecs_left)
+{
+	QTime time_left;
+	time_left = time_left.addMSecs(msecs_left);
+	tray->setToolTip(ui.state->text() + tr(" (%1 left)").arg(time_left.toString()));
+}

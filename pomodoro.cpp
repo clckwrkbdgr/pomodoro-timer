@@ -3,10 +3,18 @@
 #include "pomodoro.h"
 
 Pomodoro::Pomodoro(const Settings & settings, QObject * parent)
-	: QObject(parent), finishedPomodoroCount(0), pomodoroCount(0)
+	: QObject(parent), finishedPomodoroCount(0), pomodoroCount(0),
+	metronome(this)
 {
 	this->settings = settings;
 	pomodoroTimer = new QTimer(this);
+	metronome.setInterval(1000);
+	connect(&metronome, SIGNAL(timeout()), this, SLOT(tick()));
+}
+
+void Pomodoro::tick()
+{
+	emit timeLeftChanged(pomodoroTimer->interval() - time_left.elapsed());
 }
 
 void Pomodoro::restartTimer(int interval, const char * slot)
@@ -16,6 +24,9 @@ void Pomodoro::restartTimer(int interval, const char * slot)
 	pomodoroTimer->disconnect();
 	connect(pomodoroTimer, SIGNAL(timeout()), this, slot);
 	pomodoroTimer->start();
+	time_left.restart();
+	tick();
+	metronome.start();
 }
 
 void Pomodoro::startOrInterrupt()
@@ -35,6 +46,7 @@ void Pomodoro::startPomodoro()
 
 void Pomodoro::startBreak()
 {
+	metronome.stop();
 	++finishedPomodoroCount;
 	++pomodoroCount;
 	emit stateChanged(BREAK);
@@ -51,6 +63,7 @@ void Pomodoro::getReady()
 
 void Pomodoro::interruptPomodoro()
 {
+	metronome.stop();
 	emit stateChanged(INTERRUPTED);
 	pomodoroTimer->stop();
 }

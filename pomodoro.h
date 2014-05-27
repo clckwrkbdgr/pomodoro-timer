@@ -1,7 +1,8 @@
 #pragma once
 #include <QtCore/QObject>
+#include <QtCore/QTimer>
+#include <QtCore/QTime>
 #include "settings.h"
-class QTimer;
 
 class Pomodoro : public QObject {
 	Q_OBJECT
@@ -20,17 +21,21 @@ public slots:
 	void startOrInterrupt();
 signals:
 	void stateChanged(int event);
+	void timeLeftChanged(int msecs_left);
 
 private slots:
 	void startPomodoro();
 	void startBreak();
 	void getReady();
 	void interruptPomodoro();
+	void tick();
 private:
 	void restartTimer(int interval, const char * slot);
 	Settings settings;
 	int finishedPomodoroCount;
 	int pomodoroCount;
 	QTimer * pomodoroTimer;
+	QTimer metronome;
+	QTime time_left;
 };
 
