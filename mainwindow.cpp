@@ -92,17 +92,10 @@ MainWindow::MainWindow(QWidget * parent)
 	ui.setupUi(this);
 	restoreWindowState();
 
-	;
 	icons["start"] = QPixmap::fromImage(load_xpm(Icons::start_xpm, Chthon::size_of_array(Icons::start_xpm)));
 	icons["break"] = QPixmap::fromImage(load_xpm(Icons::break_xpm, Chthon::size_of_array(Icons::break_xpm)));
 	icons["ready"] = QPixmap::fromImage(load_xpm(Icons::ready_xpm, Chthon::size_of_array(Icons::ready_xpm)));
 	icons["interrupted"] = QPixmap::fromImage(load_xpm(Icons::interrupted_xpm, Chthon::size_of_array(Icons::interrupted_xpm)));
-	/*
-	icons["start"] = QPixmap(":/res/icons/start.png");
-	icons["break"] = QPixmap(":/res/icons/break.png");
-	icons["ready"] = QPixmap(":/res/icons/ready.png");
-	icons["interrupted"] = QPixmap(":/res/icons/interrupted.png");
-	*/
 
 	Settings settings;
 	settings.load();
@@ -265,7 +258,7 @@ void MainWindow::changeState(int event)
 		tray->setIcon(*ui.icon->pixmap());
 	}
 
-	QString stateName = eventNames.contains(event) ? eventNames[event] : tr("Get ready");
+	stateName = eventNames.contains(event) ? eventNames[event] : tr("Get ready");
 	ui.state->setText(stateName);
 	tray->setToolTip(ui.state->text());
 
@@ -276,5 +269,7 @@ void MainWindow::changeTimeLeft(int msecs_left)
 {
 	QTime time_left;
 	time_left = time_left.addMSecs(msecs_left);
-	tray->setToolTip(ui.state->text() + tr(" (%1 left)").arg(time_left.toString()));
+	QString stateWithTime = stateName + tr(" (%1 left)").arg(time_left.toString());
+	tray->setToolTip(stateWithTime);
+	ui.state->setText(stateWithTime);
 }

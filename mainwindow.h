@@ -28,6 +28,7 @@ private:
 	Pomodoro * pomodoro;
 	QMap<QString, QPixmap> icons;
 	QSystemTrayIcon * tray;
+	QString stateName;
 	void saveWindowState();
 	void restoreWindowState();
 
