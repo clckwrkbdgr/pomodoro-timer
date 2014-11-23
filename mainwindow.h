@@ -12,11 +12,7 @@ public:
 	MainWindow(QWidget * parent = 0);
 	virtual ~MainWindow();
 private slots:
-	void on_pomodoroLength_clicked();
-	void on_breakLength_clicked();
-	void on_startSound_clicked();
-	void on_endSound_clicked();
-	void on_autorestart_clicked();
+	void on_description_linkActivated(const QString &);
 
 	void changeState(int event);
 	void updateDescription(const Settings & settings);

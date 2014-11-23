@@ -149,71 +149,50 @@ void MainWindow::toggleVisibility()
 
 void MainWindow::updateDescription(const Settings & settings)
 {
+	static const QString description_text = tr(
+			"Press button to start time run.\n"
+			"After <a href=#pomodoro-length>%1</a> minutes it will end and execute <a href=#start-command>[%4]</a> command.\n"
+			"Then a break for <a href=#break-length>%2</a> minutes starts, after which <a href=#end-command>[%5]</a> command is executed.\n"
+			"Then it <a href=#autorestart>%3</a>.\n"
+			);
 	ui.description->setText(
-			tr(
-				"Pomodoro length: %1 minutes.\n"
-				"Break: %2 minutes.\n"
-				"Autorestart: %3.\n"
-				"Start break command: <%4>.\n"
-				"End break command: <%5>."
-				)
+			description_text
 			.arg(settings.getPomodoroLength() / Settings::MINUTE)
 			.arg(settings.getBreakLength() / Settings::MINUTE)
-			.arg(settings.getAutorestart() ? "on" : "off")
+			.arg(settings.getAutorestart() ? "starts again" : "stopped")
 			.arg(settings.getStartCommand())
 			.arg(settings.getEndCommand())
 			);
 }
 
-void MainWindow::on_autorestart_clicked()
-{
-	Settings settings = pomodoro->getSettings();
-	settings.setAutorestart(!settings.getAutorestart());
-	pomodoro->setSettings(settings);
-	updateDescription(settings);
-}
-
-void MainWindow::on_startSound_clicked()
-{
-	Settings settings = pomodoro->getSettings();
-	QString newValue = QInputDialog::getText(this, tr("New start break command..."), 0, QLineEdit::Normal, settings.getStartCommand());
-	if(!newValue.isEmpty()) {
-		settings.setStartCommand(newValue);
-		pomodoro->setSettings(settings);
-		updateDescription(settings);
-	}
-}
-
-void MainWindow::on_endSound_clicked()
-{
-	Settings settings = pomodoro->getSettings();
-	QString newValue = QInputDialog::getText(this, tr("New end break command..."), 0, QLineEdit::Normal, settings.getEndCommand());
-	if(!newValue.isEmpty()) {
-		settings.setEndCommand(newValue);
-		pomodoro->setSettings(settings);
-		updateDescription(settings);
-	}
-}
-
-void MainWindow::on_pomodoroLength_clicked()
+void MainWindow::on_description_linkActivated(const QString & link)
 {
 	Settings settings = pomodoro->getSettings();
 	bool ok = false;
-	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New pomodoro length in minutes:"), settings.getPomodoroLength() / Settings::MINUTE, 1, 60, 1, &ok);
-	if(ok) {
-		settings.setPomodoroLength(newValue * Settings::MINUTE);
-		pomodoro->setSettings(settings);
-		updateDescription(settings);
+	if(link == "#autorestart") {
+		settings.setAutorestart(!settings.getAutorestart());
+	} else if(link == "#pomodoro-length") {
+		int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New pomodoro length in minutes:"), settings.getPomodoroLength() / Settings::MINUTE, 1, 60, 1, &ok);
+		if(ok) {
+			settings.setPomodoroLength(newValue * Settings::MINUTE);
+		}
+	} else if(link == "#break-length") {
+		int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New break length in minutes:"), settings.getBreakLength() / Settings::MINUTE, 1, 60, 1, &ok);
+		if(ok) {
+			settings.setBreakLength(newValue * Settings::MINUTE);
+		}
+	} else if(link == "#start-command") {
+		QString newValue = QInputDialog::getText(this, tr("Settings"), tr("New start break command:"), QLineEdit::Normal, settings.getStartCommand(), &ok);
+		if(ok) {
+			settings.setStartCommand(newValue);
+		}
+	} else if(link == "#end-command") {
+		QString newValue = QInputDialog::getText(this, tr("Settings"), tr("New end break command:"), QLineEdit::Normal, settings.getEndCommand(), &ok);
+		if(ok) {
+			settings.setEndCommand(newValue);
+		}
 	}
-}
-
-void MainWindow::on_breakLength_clicked()
-{
-	Settings settings = pomodoro->getSettings();
-	bool ok = false;
-	int newValue = QInputDialog::getInt(this, tr("Settings"), tr("New break length in minutes:"), settings.getBreakLength() / Settings::MINUTE, 1, 60, 1, &ok);
 	if(ok) {
-		settings.setBreakLength(newValue * Settings::MINUTE);
 		pomodoro->setSettings(settings);
 		updateDescription(settings);
 	}
