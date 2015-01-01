@@ -160,7 +160,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::single_shot_fired()
 {
-	changeState(Pomodoro::BREAK_ENDED);
+	changeState(Pomodoro::SINGLE_SHOT);
 }
 
 void MainWindow::activateFromTray(QSystemTrayIcon::ActivationReason reason)
@@ -182,10 +182,14 @@ void MainWindow::toggleVisibility()
 void MainWindow::updateDescription(const Settings & settings)
 {
 	static const QString description_text = tr(
-			"Press button to start time run.\n"
-			"After <a href=#pomodoro-length>%1</a> minutes it will end and execute <a href=#start-command>[%4]</a> command.\n"
-			"Then a break for <a href=#break-length>%2</a> minutes starts, after which <a href=#end-command>[%5]</a> command is executed.\n"
-			"Then it <a href=#autorestart>%3</a>.\n"
+			"Press button to start time run.<br>"
+			"After <a href=#pomodoro-length>%1</a> minutes it will end and execute <a href=#start-command>[%4]</a> command.<br>"
+			"Then a break for <a href=#break-length>%2</a> minutes starts, after which <a href=#end-command>[%5]</a> command is executed.<br>"
+			"Then it <a href=#autorestart>%3</a>.<br>"
+			"<br>"
+			"Or you could run pomodoro with command-line parameter '--single-shot' to run a single shot.<br>"
+			"It will ask for shot length and start immediately.<br>"
+			"After that it will stop, run <a href=#singleshot-command>[%6]</a> and stop, waiting for you to exit by clicking tray icon.<br>"
 			);
 	ui.description->setText(
 			description_text
@@ -194,6 +198,7 @@ void MainWindow::updateDescription(const Settings & settings)
 			.arg(settings.getAutorestart() ? "starts again" : "stopped")
 			.arg(settings.getStartCommand())
 			.arg(settings.getEndCommand())
+			.arg(settings.getSingleShotCommand())
 			);
 }
 
@@ -222,6 +227,11 @@ void MainWindow::on_description_linkActivated(const QString & link)
 		QString newValue = QInputDialog::getText(this, tr("Settings"), tr("New end break command:"), QLineEdit::Normal, settings.getEndCommand(), &ok);
 		if(ok) {
 			settings.setEndCommand(newValue);
+		}
+	} else if(link == "#singleshot-command") {
+		QString newValue = QInputDialog::getText(this, tr("Settings"), tr("New single shot command:"), QLineEdit::Normal, settings.getSingleShotCommand(), &ok);
+		if(ok) {
+			settings.setSingleShotCommand(newValue);
 		}
 	}
 	if(ok) {
@@ -260,6 +270,7 @@ void MainWindow::changeState(int event)
 	switch(event) {
 		case Pomodoro::BREAK: QProcess::startDetached(pomodoro->getSettings().getStartCommand()); break;
 		case Pomodoro::BREAK_ENDED: QProcess::startDetached(pomodoro->getSettings().getEndCommand()); break;
+		case Pomodoro::SINGLE_SHOT: QProcess::startDetached(pomodoro->getSettings().getSingleShotCommand()); break;
 		default: break;
 	}
 

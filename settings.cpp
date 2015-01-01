@@ -15,6 +15,7 @@ void Settings::load()
 	breakLength = settings.value("pomodoro/breaklength", breakLength).toInt();
 	startCommand = settings.value("commands/start", startCommand).toString();
 	endCommand = settings.value("commands/end", endCommand).toString();
+	singleshotCommand = settings.value("commands/singleshot", singleshotCommand).toString();
 }
 
 void Settings::save() const
@@ -25,6 +26,7 @@ void Settings::save() const
 	settings.setValue("pomodoro/breaklength", breakLength);
 	settings.setValue("commands/start", startCommand);
 	settings.setValue("commands/end", endCommand);
+	settings.setValue("commands/singleshot", singleshotCommand);
 }
 
 bool Settings::getAutorestart() const
@@ -75,5 +77,15 @@ const QString & Settings::getEndCommand() const
 void Settings::setEndCommand(const QString & value)
 {
 	endCommand = value;
+}
+
+const QString & Settings::getSingleShotCommand() const
+{
+	return singleshotCommand;
+}
+
+void Settings::setSingleShotCommand(const QString & value)
+{
+	singleshotCommand = value;
 }
 

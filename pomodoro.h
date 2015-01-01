@@ -8,7 +8,7 @@ class Pomodoro : public QObject {
 	Q_OBJECT
 	Q_DISABLE_COPY(Pomodoro)
 public:
-	enum { NONE, ON_RUN, BREAK, BREAK_ENDED, INTERRUPTED };
+	enum { NONE, ON_RUN, BREAK, BREAK_ENDED, INTERRUPTED, SINGLE_SHOT };
 
 	Pomodoro(const Settings & settings, QObject * parent = 0);
 	virtual ~Pomodoro() {}

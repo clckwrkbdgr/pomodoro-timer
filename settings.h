@@ -22,11 +22,14 @@ public:
 	void setStartCommand(const QString & value);
 	const QString & getEndCommand() const;
 	void setEndCommand(const QString & value);
+	const QString & getSingleShotCommand() const;
+	void setSingleShotCommand(const QString & value);
 private:
 	bool autorestart;
 	int pomodoroLength;
 	int breakLength;
 	QString startCommand;
 	QString endCommand;
+	QString singleshotCommand;
 };
 
