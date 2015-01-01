@@ -1,6 +1,8 @@
 #pragma once
 #include <QtGui/QWidget>
 #include <QtGui/QSystemTrayIcon>
+#include <QtCore/QTimer>
+#include <QtCore/QTime>
 #include "ui_mainwindow.h"
 class Pomodoro;
 class Settings;
@@ -20,9 +22,12 @@ private slots:
 	void activateFromTray(QSystemTrayIcon::ActivationReason reason);
 	void changeTimeLeft(int msecs_left);
 	void single_shot_fired();
+	void tick();
 private:
 	bool single_shot;
 	QTimer * single_shot_timer;
+	QTimer metronome;
+	QTime time_left;
 	Ui::MainWindow ui;
 	Pomodoro * pomodoro;
 	QMap<QString, QPixmap> icons;

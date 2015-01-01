@@ -105,6 +105,9 @@ MainWindow::MainWindow(bool use_single_shot, QWidget * parent)
 	}
 	updateDescription(settings);
 
+	tray = new QSystemTrayIcon(this);
+	connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activateFromTray(QSystemTrayIcon::ActivationReason)));
+
 	pomodoro = new Pomodoro(settings, this);
 
 	if(single_shot) {
@@ -114,20 +117,24 @@ MainWindow::MainWindow(bool use_single_shot, QWidget * parent)
 		if(!ok) {
 			exit(0);
 		}
+
+		metronome.setInterval(1000);
+		connect(&metronome, SIGNAL(timeout()), this, SLOT(tick()));
+
 		single_shot_timer = new QTimer(this);
 		single_shot_timer->setInterval(length * Settings::MINUTE);
 		single_shot_timer->setSingleShot(true);
 		connect(single_shot_timer, SIGNAL(timeout()),
 				this, SLOT(single_shot_fired()));
 		single_shot_timer->start();
+		time_left.restart();
+		tick();
+		metronome.start();
 	} else {
 		connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
 		connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
 		connect(pomodoro, SIGNAL(timeLeftChanged(int)), this, SLOT(changeTimeLeft(int)));
-	}
 
-	tray = new QSystemTrayIcon(this);
-	if(!single_shot) {
 		QMenu * trayMenu = new QMenu(this);
 		trayMenu->addAction(tr("Start/interrupt"), pomodoro, SLOT(startOrInterrupt()));
 		trayMenu->addSeparator();
@@ -136,7 +143,6 @@ MainWindow::MainWindow(bool use_single_shot, QWidget * parent)
 		trayMenu->addAction(tr("Quit"), this, SLOT(close()));
 		tray->setContextMenu(trayMenu);
 	}
-	connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activateFromTray(QSystemTrayIcon::ActivationReason)));
 
 	if(single_shot) {
 		changeState(Pomodoro::ON_RUN);
@@ -158,9 +164,15 @@ MainWindow::~MainWindow()
 	saveWindowState();
 }
 
+void MainWindow::tick()
+{
+	changeTimeLeft(single_shot_timer->interval() - time_left.elapsed());
+}
+
 void MainWindow::single_shot_fired()
 {
 	changeState(Pomodoro::SINGLE_SHOT);
+	metronome.stop();
 }
 
 void MainWindow::activateFromTray(QSystemTrayIcon::ActivationReason reason)
