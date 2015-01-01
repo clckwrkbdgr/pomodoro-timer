@@ -260,6 +260,14 @@ void MainWindow::restoreWindowState()
 		setWindowState(Qt::WindowMaximized);
 }
 
+void run_command(const QString & command)
+{
+	if(command.isEmpty()) {
+		return;
+	}
+	QProcess::startDetached(command);
+}
+
 void MainWindow::changeState(int event)
 {
 	ui.statistics->setText(
@@ -268,9 +276,9 @@ void MainWindow::changeState(int event)
 			);
 
 	switch(event) {
-		case Pomodoro::BREAK: QProcess::startDetached(pomodoro->getSettings().getStartCommand()); break;
-		case Pomodoro::BREAK_ENDED: QProcess::startDetached(pomodoro->getSettings().getEndCommand()); break;
-		case Pomodoro::SINGLE_SHOT: QProcess::startDetached(pomodoro->getSettings().getSingleShotCommand()); break;
+		case Pomodoro::BREAK: run_command(pomodoro->getSettings().getStartCommand()); break;
+		case Pomodoro::BREAK_ENDED: run_command(pomodoro->getSettings().getEndCommand()); break;
+		case Pomodoro::SINGLE_SHOT: run_command(pomodoro->getSettings().getSingleShotCommand()); break;
 		default: break;
 	}
 
