@@ -7,6 +7,8 @@ int main(int argc, char ** argv)
 	app.setOrganizationName("kp580bm1");
 	app.setApplicationName("pomodoro");
 
-	MainWindow wnd;
+	QStringList args = app.arguments();
+	bool single_shot = args.contains("--single-shot");
+	MainWindow wnd(single_shot);
 	return app.exec();
 }

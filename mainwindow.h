@@ -9,7 +9,7 @@ class MainWindow : public QWidget {
 	Q_OBJECT
 	Q_DISABLE_COPY(MainWindow)
 public:
-	MainWindow(QWidget * parent = 0);
+	MainWindow(bool use_single_shot, QWidget * parent = 0);
 	virtual ~MainWindow();
 private slots:
 	void on_description_linkActivated(const QString &);
@@ -19,7 +19,10 @@ private slots:
 	void toggleVisibility();
 	void activateFromTray(QSystemTrayIcon::ActivationReason reason);
 	void changeTimeLeft(int msecs_left);
+	void single_shot_fired();
 private:
+	bool single_shot;
+	QTimer * single_shot_timer;
 	Ui::MainWindow ui;
 	Pomodoro * pomodoro;
 	QMap<QString, QPixmap> icons;

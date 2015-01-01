@@ -76,8 +76,9 @@ QImage load_xpm(const char * xpm [], int size)
 	return result;
 }
 
-MainWindow::MainWindow(QWidget * parent)
-	: QWidget(parent)
+MainWindow::MainWindow(bool use_single_shot, QWidget * parent)
+	: QWidget(parent), single_shot(use_single_shot), single_shot_timer(nullptr),
+	pomodoro(nullptr)
 {
 	eventIcons[Pomodoro::ON_RUN    ] = "start";
 	eventIcons[Pomodoro::BREAK] = "break";
@@ -105,21 +106,43 @@ MainWindow::MainWindow(QWidget * parent)
 	updateDescription(settings);
 
 	pomodoro = new Pomodoro(settings, this);
-	connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
-	connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
-	connect(pomodoro, SIGNAL(timeLeftChanged(int)), this, SLOT(changeTimeLeft(int)));
+
+	if(single_shot) {
+		bool ok = false;
+		int length = QInputDialog::getInt(this, tr("Single shot interval"),
+				tr("Set interval (in minutes):"), 5, 1, 60, 1, &ok);
+		if(!ok) {
+			exit(0);
+		}
+		single_shot_timer = new QTimer(this);
+		single_shot_timer->setInterval(length * Settings::MINUTE);
+		single_shot_timer->setSingleShot(true);
+		connect(single_shot_timer, SIGNAL(timeout()),
+				this, SLOT(single_shot_fired()));
+		single_shot_timer->start();
+	} else {
+		connect(pomodoro, SIGNAL(stateChanged(int)), this, SLOT(changeState(int)));
+		connect(ui.startOrInterrupt, SIGNAL(clicked()), pomodoro, SLOT(startOrInterrupt()));
+		connect(pomodoro, SIGNAL(timeLeftChanged(int)), this, SLOT(changeTimeLeft(int)));
+	}
 
 	tray = new QSystemTrayIcon(this);
-	QMenu * trayMenu = new QMenu(this);
-	trayMenu->addAction(tr("Start/interrupt"), pomodoro, SLOT(startOrInterrupt()));
-	trayMenu->addSeparator();
-	trayMenu->addAction(tr("Settings..."), this, SLOT(toggleVisibility()));
-	trayMenu->addSeparator();
-	trayMenu->addAction(tr("Quit"), this, SLOT(close()));
-	tray->setContextMenu(trayMenu);
+	if(!single_shot) {
+		QMenu * trayMenu = new QMenu(this);
+		trayMenu->addAction(tr("Start/interrupt"), pomodoro, SLOT(startOrInterrupt()));
+		trayMenu->addSeparator();
+		trayMenu->addAction(tr("Settings..."), this, SLOT(toggleVisibility()));
+		trayMenu->addSeparator();
+		trayMenu->addAction(tr("Quit"), this, SLOT(close()));
+		tray->setContextMenu(trayMenu);
+	}
 	connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(activateFromTray(QSystemTrayIcon::ActivationReason)));
 
-	changeState(Pomodoro::NONE);
+	if(single_shot) {
+		changeState(Pomodoro::ON_RUN);
+	} else {
+		changeState(Pomodoro::NONE);
+	}
 	if(DEBUG) {
 		show();
 	} else {
@@ -135,10 +158,19 @@ MainWindow::~MainWindow()
 	saveWindowState();
 }
 
+void MainWindow::single_shot_fired()
+{
+	changeState(Pomodoro::BREAK_ENDED);
+}
+
 void MainWindow::activateFromTray(QSystemTrayIcon::ActivationReason reason)
 {
 	if(reason == QSystemTrayIcon::Trigger) {
-		pomodoro->startOrInterrupt();
+		if(single_shot) {
+			close();
+		} else {
+			pomodoro->startOrInterrupt();
+		}
 	}
 }
 
