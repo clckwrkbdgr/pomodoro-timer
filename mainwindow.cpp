@@ -171,8 +171,8 @@ void MainWindow::tick()
 
 void MainWindow::single_shot_fired()
 {
-	changeState(Pomodoro::SINGLE_SHOT);
 	metronome.stop();
+	changeState(Pomodoro::SINGLE_SHOT);
 }
 
 void MainWindow::activateFromTray(QSystemTrayIcon::ActivationReason reason)
@@ -290,7 +290,10 @@ void MainWindow::changeState(int event)
 	switch(event) {
 		case Pomodoro::BREAK: run_command(pomodoro->getSettings().getStartCommand()); break;
 		case Pomodoro::BREAK_ENDED: run_command(pomodoro->getSettings().getEndCommand()); break;
-		case Pomodoro::SINGLE_SHOT: run_command(pomodoro->getSettings().getSingleShotCommand()); break;
+		case Pomodoro::SINGLE_SHOT:
+			run_command(pomodoro->getSettings().getSingleShotCommand());
+			close();
+			return;
 		default: break;
 	}
 
