@@ -4,7 +4,7 @@
 int main(int argc, char ** argv)
 {
 	QApplication app(argc, argv);
-	app.setOrganizationName("kp580bm1");
+	app.setOrganizationName("umi0451");
 	app.setApplicationName("pomodoro");
 
 	QStringList args = app.arguments();
