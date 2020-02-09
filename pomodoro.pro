@@ -25,3 +25,13 @@ POMODORO_TEST {
 		SOURCES += $${module}.cpp
 	}
 }
+deb.depends = $(TARGET)
+deb.commands = @debpackage.py \
+		pomodoro-timer \
+		-v 0.1.0 \
+		--maintainer \'umi041 <umi0451@gmail.com>\' \
+		--bin $(TARGET) \
+		--build-dir tmp \
+		--dest-dir . \
+		--description \'Simple pomodoro timer.\'
+QMAKE_EXTRA_TARGETS += deb

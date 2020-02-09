@@ -2,3 +2,4 @@ Makefile
 .*.swp
 tmp/
 pomodoro
+*.deb
